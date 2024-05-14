@@ -1,8 +1,3 @@
-/*
-This files defines common structures and functions
-that may be used in other modules.
-*/
-
 pub enum PieceType {
     King, 
     Queen, 
