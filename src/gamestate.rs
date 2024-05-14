@@ -1,19 +1,24 @@
 mod defs;
 mod fen;
-use defs::*;
-use crate::board;
+//use defs::;
+use board;
 
-
-
+#[derive(Debug, Clone, PartialEqHow)]
 pub struct Gamestate {
     board: Board,
-    side_to_move: Side,
-
+    side_to_move: Side,    
+    en_passant: Option<u8>,
+    half_move_clock: u32,
+    full_move_count: u32,
 }
 
 impl Gamestate {
-    pub fn new(&str: fen) -> Self {
-        parse_fen_to_gamestate(fen)
+    pub fn new() -> Self {
+        board = Board;
+        side_to_move = Side::None;
+        en_passant = None;
+
+    
     }
 }
 
