@@ -3,17 +3,12 @@ use defs::*;
 use std::unimplemented;
 
 
-// Each array of pieces should consist of element type of piece, which are UNIQUE
-// If you were to add new piece it whould have to implement ChesPiece trait
 pub struct Board {
     white_pieces: [Bitboard; PIECE_TYPES_NUM],
     black_pieces: [Bitboard; PIECE_TYPES_NUM],
     side_to_move: Side,
 }
 
-pub struct Square {
-
-}
 impl Board {
     pub fn new() {
         unimplemented!()
