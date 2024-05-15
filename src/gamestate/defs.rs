@@ -25,20 +25,20 @@ pub struct CastlingRights {
 impl CastlingRights {
     pub fn new() -> Self {
         Self {
-            white: Both,
-            black: Both,
+            white: CastlingSide::Both,
+            black: CastlingSide::Both,
         }
     }
     pub fn disable(&mut self, side: Side) {
         match side {
-            White => white = CastlingRights::None,
-            Black => black = CastlingRights::None,
+            White => self.white = CastlingSide::None,
+            Black => self.black = CastlingSide::None,
         }
     }
 
     // NOTE: Do not pass None to cs
-    pub fn is_allowed(&self, side:Size, cs:CastlingRights) -> Bool {
-        match side {
+    pub fn is_allowed(&self, side_to_mode:Side, cs:CastlingSide) -> bool {
+        match side_to_mode {
             Side::White => match cs {
                 CastlingSide::Kingside => matches!(self.white, CastlingSide::Kingside | CastlingSide::Both),
                 CastlingSide::Queenside => matches!(self.white, CastlingSide::Queenside | CastlingSide::Both),
