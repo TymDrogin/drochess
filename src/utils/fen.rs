@@ -2,7 +2,7 @@ use gamestate::Gamestate:: {
     Gamestate,
     Board,
 };
-
+use thiserror::Error;
 use core::str;
 
 pub const DEFAULT_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
