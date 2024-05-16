@@ -1,9 +1,10 @@
 mod gamestate;
 mod utils;
-use crate::board::defs::*;
-use crate::utils::print_bitboard;
-use crate::gamestate::Gamestate;
+use utils::fen::*;
+
+
 fn main() {
-    let board: Bitboard = 0;
-    print_bitboard(board);
+    let fen = Fen(DEFAULT_FEN);
+    fen.process();
+    println!("Hello World!");
 }

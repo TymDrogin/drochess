@@ -7,7 +7,6 @@ pub enum Side {
 // way of encapsulating states using enums. The good thing is in the future
 // use of enums will pay of by forcing me or anybody else to cover all cases.
 
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CastlingSide {
     None,
@@ -21,7 +20,6 @@ pub struct CastlingRights {
     white: CastlingSide,
     black: CastlingSide,
 }
-
 impl CastlingRights {
     pub fn new() -> Self {
         Self {
@@ -31,8 +29,8 @@ impl CastlingRights {
     }
     pub fn disable(&mut self, side: Side) {
         match side {
-            White => self.white = CastlingSide::None,
-            Black => self.black = CastlingSide::None,
+            Side::White => self.white = CastlingSide::None,
+            Side::Black => self.black = CastlingSide::None,
         }
     }
 
