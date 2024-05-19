@@ -8,10 +8,11 @@ pub struct Board {
 
 impl Board {
     pub fn set_square(&mut self, ranks: usize, files: usize, pt: PieceType, side: Side) {
-        let mask: Bitboard = 1 << (files * 8 + rank);
+        let mask: Bitboard = 1 << (files * 8 + ranks);
+        
         match side {
-            Side::White => self.white_pieces[PieceType] |= mask,
-            Side::Black => self.black_pieces[PieceType] |= mask,
+            Side::White => self.white_pieces[pt as usize] |= mask,
+            Side::Black => self.black_pieces[pt as usize] |= mask,
         }
     }
 }

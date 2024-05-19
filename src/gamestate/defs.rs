@@ -1,6 +1,4 @@
-// Instead of stantrart bitflags i decided to go with more ideomatic
-// way of encapsulating states using enums. The good thing is in the future
-// use of enums will pay of by forcing me or anybody else to cover all cases.
+use crate::gamestate::board::Side;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CastlingSide {

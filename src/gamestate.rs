@@ -2,11 +2,11 @@ pub mod defs;
 pub mod board;
 
 use self::{
-    defs::{
+    defs::CastlingRights,
+    board:: {
+        Board,
         Side,
-        CastlingRights,
-    },
-    board::Board,
+    }
 };
 
 
