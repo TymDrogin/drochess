@@ -2,8 +2,8 @@ pub const PIECE_TYPES_NUM: usize = 6;
 pub type Bitboard = u64;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Board {
-    white_pieces: [Bitboard; PIECE_TYPES_NUM],
-    black_pieces: [Bitboard; PIECE_TYPES_NUM],
+    pub white_pieces: [Bitboard; PIECE_TYPES_NUM],
+    pub black_pieces: [Bitboard; PIECE_TYPES_NUM],
 }
 
 pub enum PieceType {

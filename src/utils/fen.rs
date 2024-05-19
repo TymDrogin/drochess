@@ -1,7 +1,8 @@
-use gamestate::Gamestate:: {
+use crate::gamestate::{
     Gamestate,
-    Board,
+    board::Board,
 };
+
 use thiserror::Error;
 use core::str;
 
@@ -12,10 +13,7 @@ const LIST_OF_PIECES: &str = "kqrbnpKQRBNP";
 const WHITE_OR_BLACK: &str = "wb";
 const SPLITTER: char = '/';
 const DASH: char = '-';
-const EM_DASH: char = '–';
 const SPACE: char = ' ';
-
-
 
 #[derive(Error, Debug)]
 pub enum FenError {
@@ -23,31 +21,38 @@ pub enum FenError {
     InvalidLength(usize),
 
     #[error("Error in 1 part of FEN: Pieces or squares")]
-    Part1,
+    PieceLayout,
     #[error("Error in 2 part of FEN:  Colors")]
-    Part2,
+    StartingSide,
     #[error("Error in 3 part of FEN:  Castling rights")]
-    Part3,
+    CastlingRights,
     #[error("Error in 4 part of FEN:  En passant field")]
-    Part4,
+    EnPassant,
     #[error("Error in 5 part of FEN: : Half-move clock")]
-    Part5,
+    HalfMoveClock,
     #[error("Error in 6 part of FEN:  Full-move number")]
-    Part6,
+    FullMoveCounte,
 } 
 pub type FenResult = Result<Gamestate, FenError>;
 
 // Fen struct is used to independently implement fen logic,
 // Instead of having it be a part of Gamestate
-pub struct Fen(&str);
+pub struct Fen(pub String);
 impl Fen {
     pub fn process(&self) -> FenResult {
-        let separated_fen: Vec<&str> = self.0.split_whitespaces().collect();
-        if(separated_fen.len() != FEN_NR_OF_PARTS) {
-            FenError::InvalidLength(separated_fen.len());
+        let mut gamestate: Gamestate;
+
+        let separated_fen: Vec<&str> = self.0.split_whitespace().collect();
+        if separated_fen.len() != FEN_NR_OF_PARTS {
+            return Err(FenError::InvalidLength(separated_fen.len()));
         }
-        let mut board: Board = {0};
+
+        
+        let piece_layout = separated_fen[0];
+
+
+
+
+        todo!();
     }
-
-
 }

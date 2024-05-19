@@ -1,5 +1,5 @@
 pub mod defs;
-mod board;
+pub mod board;
 
 use self::{
     defs::{
