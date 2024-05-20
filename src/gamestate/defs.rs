@@ -7,6 +7,12 @@ pub enum CastlingSide {
     Queenside,
     Both
 }
+impl CastlingSide {
+    pub fn set(&mut self, castling_mask) {
+
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CastlingRights {
     pub white: CastlingSide,
@@ -29,8 +35,8 @@ impl CastlingRights {
 
     pub fn set_for_side(&mut self, side: Side, rights: CastlingSide) -> Result<(), FenError> {
         match side {
-            Side::White => self.white = (self.white as u8 | rights as u8) as CastlingSide,
-            Side::Black => self.black = (self.black as u8 | rights as u8) as CastlingSide,
+            Side::White => self.white = (self.white as u8 | rights as u8),
+            Side::Black => self.black = (self.black as u8 | rights as u8),
         }
         Ok(())
     }
