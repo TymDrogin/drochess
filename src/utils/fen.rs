@@ -114,37 +114,7 @@ impl Fen {
     }
     // That is a lot of code as a consequence of me refusing to use flag bits and using ideomatic enums
     fn get_castling_rights(s: &str) -> Result<CastlingRights, FenError> {
-        let castling_rights = CastlingRights;
-        for c in s.chars() {
-            let mut castling_rights = CastlingRights;
-        
-            for c in s.chars() {
-                match c {
-                    WHITE_KINGSIDE => match castling_rights.white {
-                        CastlingSide::None => castling_rights.white = CastlingSide::Kingside,
-                        CastlingSide::Queenside => castling_rights.white = CastlingSide::Both,
-                        _ => Err(CastlingRights)
-                    },
-                    WHITE_QUEENSIDE => match castling_rights.white {
-                        CastlingSide::None => castling_rights.white = CastlingSide::Queenside,
-                        CastlingSide::Kingside => castling_rights.white = CastlingSide::Both,
-                        _ => Err(CastlingRights)
-                    },
-                    BLACK_KINGSIDE => match castling_rights.black {
-                        CastlingSide::None => castling_rights.black = CastlingSide::Kingside,
-                        CastlingSide::Queenside => castling_rights.black = CastlingSide::Both,
-                        _ => Err(CastlingRights)
-                    },
-                    BLACK_QUEENSIDE => match castling_rights.black {
-                        CastlingSide::None => castling_rights.black = CastlingSide::Queenside,
-                        CastlingSide::Kingside => castling_rights.black = CastlingSide::Both,
-                        _ => Err(CastlingRights)
-                    },
-                    _ => return Err(FenError::InvalidCharacter(c)),
-                }
-            }
-            Ok(castling_rights)
-        }
+        todo!()
     }
 
     fn get_en_passant(s: &str) -> Result<Option<u8>, FenError> {
