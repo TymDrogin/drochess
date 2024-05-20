@@ -46,7 +46,7 @@ impl CastlingRights {
             }
             Side::Black => {
                 let mask = !((castling_side_to_disable as u8) << BLACK_SIDE_OFFSET); 
-                self.0 &= maks;
+                self.0 &= mask;
             }
         }
 
