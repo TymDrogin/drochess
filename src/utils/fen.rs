@@ -1,6 +1,9 @@
 use crate::gamestate::{
-    board::Board,
-    defs::{CastlingRights, Side},
+    board::{
+        Board,
+        Side
+    },
+    defs::{CastlingRights},
     Gamestate,
 };
 use core::str;
@@ -120,14 +123,14 @@ impl Fen {
     fn get_en_passant(s: &str) -> Result<Option<u8>, FenError> {
         todo!()
     }
-    fn get_half_move_clock(s: &str) -> Result<usize, FenError> {
-        match s.parse::<usize>() {
+    fn get_half_move_clock(s: &str) -> Result<u8, FenError> {
+        match s.parse::<u8>() {
             Ok(x) => Ok(x),
             Err(_) => Err(FenError::HalfMoveClock),
         }
     }
-    fn get_full_move_count(s: &str) -> Result<usize, FenError> {
-        match s.parse::<usize>() {
+    fn get_full_move_count(s: &str) -> Result<u8, FenError> {
+        match s.parse::<u8>() {
             Ok(x) => Ok(x),
             Err(_) => Err(FenError::FullMoveCounte),
         }

@@ -51,6 +51,7 @@ impl CastlingRights {
         }
 
     }
+    #[inline(always)]
     pub fn disable_all(&mut self) {
         self.0 = 0;
     }

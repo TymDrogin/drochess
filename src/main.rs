@@ -1,9 +1,11 @@
 mod gamestate;
 mod utils;
+use core::mem;
+
 use utils::fen::*;
 
+use crate::gamestate::Gamestate;
+
 fn main() {
-    let fen = Fen(DEFAULT_FEN.to_owned());
-    fen.process();
-    println!("Hello World!");
+    println!("Size of MyStruct: {} bytes", mem::size_of::<Gamestate>());
 }
