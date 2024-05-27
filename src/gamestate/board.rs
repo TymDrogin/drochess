@@ -1,7 +1,9 @@
 pub const PIECE_TYPES_NUM: usize = 6;
-const BOARD_SIDE_LENGHT: usize = 8;
+pub const BOARD_SIDE_LENGHT: usize = 8;
 
 pub type Bitboard = u64;
+
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Board {
     pub white_pieces: [Bitboard; PIECE_TYPES_NUM],
@@ -23,6 +25,8 @@ impl Board {
         }
     }
 }
+
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PieceType {
     Pawn,
@@ -42,7 +46,13 @@ pub enum Side {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Square(u8);
 impl Square {
-    pub fn new(file: u8, rank: u8) -> Self {
+    pub fn new(index: u8) -> Self {
+        if index > 63 {
+            panic!("Attempted to create square with index {}, which is more then max of 63", index);
+        }
+        Self(index)
+    }
+    pub fn new_from_file_rank(file: u8, rank: u8) -> Self {
         if rank > 7 || file > 7 {
             panic!("Attempted to create square with file: {} or rank: {} vith values more then 7", file, rank);
         }
@@ -76,9 +86,8 @@ impl Square {
             '8' => 7,
             _ => panic!("Invalid rank in coordinates"),
         };
-        Self::new(file, rank)
+        Self::new_from_file_rank(file, rank)
     }
-
     pub fn get_index(&self) -> usize {
         self.0 as usize
     }

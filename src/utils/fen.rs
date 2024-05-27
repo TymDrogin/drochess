@@ -1,9 +1,6 @@
 use crate::gamestate::{
-    board::{
-        Board,
-        Side
-    },
-    defs::{CastlingRights},
+    board::{Board, Side},
+    defs::{CastlingRights, CastlingSide},
     Gamestate,
 };
 use core::str;
@@ -36,7 +33,7 @@ pub const BLACK_PAWN: char = 'p';
 const WHITE_SIDE: char = 'w';
 const BLACK_SIDE: char = 'b';
 
-// Castling sides symbols 
+// Castling sides symbols
 const WHITE_KINGSIDE: char = 'K';
 const WHITE_QUEENSIDE: char = 'Q';
 const BLACK_KINGSIDE: char = 'k';
@@ -88,14 +85,14 @@ impl Fen {
         let half_move_clock = Self::get_half_move_clock(separated_fen[HALF_MOVE_CLOCK])?;
         let full_move_count = Self::get_full_move_count(separated_fen[FULL_MOVE_COUNTER])?;
 
-        Ok(Gamestate {
+        return Ok(Gamestate {
             board,
             side_to_move,
             castling_rights,
             en_passant,
             half_move_clock,
             full_move_count,
-        })
+        });
     }
 
     fn get_board(s: &str) -> Result<Board, FenError> {
@@ -108,7 +105,7 @@ impl Fen {
         if s.len() != 1 {
             return Err(FenError::StartingSide);
         }
-    
+
         match s.chars().next() {
             Some(WHITE_SIDE) => Ok(Side::White),
             Some(BLACK_SIDE) => Ok(Side::Black),
@@ -117,7 +114,21 @@ impl Fen {
     }
     // That is a lot of code as a consequence of me refusing to use flag bits and using ideomatic enums
     fn get_castling_rights(s: &str) -> Result<CastlingRights, FenError> {
-        todo!()
+        if s.len() > 4 {
+            return Err(FenError::CastlingRights);
+        }
+
+        let mut cr = CastlingRights::new();
+        for _ in 0..3 {
+            match s.chars().next() {
+                Some(WHITE_KINGSIDE) => cr.set_for_side(Side::White, CastlingSide::Kingside),
+                Some(WHITE_QUEENSIDE) => cr.set_for_side(Side::White, CastlingSide::Queenside),
+                Some(BLACK_KINGSIDE) => cr.set_for_side(Side::Black, CastlingSide::Kingside),
+                Some(BLACK_QUEENSIDE) => cr.set_for_side(Side::Black, CastlingSide::Queenside),
+                _ => return Err(FenError::CastlingRights),
+            }
+        }
+        Ok(cr)
     }
 
     fn get_en_passant(s: &str) -> Result<Option<u8>, FenError> {

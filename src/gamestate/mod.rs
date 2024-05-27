@@ -8,6 +8,7 @@ use self::{
         Side,
     }
 };
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Gamestate {
     pub board: Board,
@@ -17,4 +18,3 @@ pub struct Gamestate {
     pub half_move_clock: u8,
     pub full_move_count: u8,
 }
-

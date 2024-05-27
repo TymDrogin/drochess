@@ -1,11 +1,9 @@
-mod gamestate;
+pub mod gamestate;
 mod utils;
-use core::mem;
-
 use utils::fen::*;
 
-use crate::gamestate::Gamestate;
-
 fn main() {
-    println!("Size of MyStruct: {} bytes", mem::size_of::<Gamestate>());
+    let fen = Fen(DEFAULT_FEN.to_string());
+    let game = fen.process().unwrap();
+    print!("{}", game);
 }
