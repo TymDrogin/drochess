@@ -1,8 +1,7 @@
 pub const PIECE_TYPES_NUM: usize = 6;
-pub const BOARD_SIDE_LENGHT: usize = 8;
+pub const BOARD_SIDE_LENGTH: u8 = 8;
 
 pub type Bitboard = u64;
-
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Board {
@@ -12,20 +11,19 @@ pub struct Board {
 impl Board {
     pub fn new() -> Self {
         Self {
-            white_pieces:[0; PIECE_TYPES_NUM],
-            black_pieces:[0; PIECE_TYPES_NUM],
+            white_pieces: [0; PIECE_TYPES_NUM],
+            black_pieces: [0; PIECE_TYPES_NUM],
         }
     }
     pub fn set_square(&mut self, square: Square, pt: PieceType, side: Side) {
         let mask: Bitboard = 1 << square.get_index();
-        
+
         match side {
             Side::White => self.white_pieces[pt as usize] |= mask,
             Side::Black => self.black_pieces[pt as usize] |= mask,
         }
     }
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PieceType {
@@ -42,28 +40,30 @@ pub enum Side {
     Black,
 }
 
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Square(u8);
 impl Square {
     pub fn new(index: u8) -> Self {
         if index > 63 {
-            panic!("Attempted to create square with index {}, which is more then max of 63", index);
+            panic!(
+                "Attempted to create square with index {}, which is more then max of 63",
+                index
+            );
         }
         Self(index)
     }
-    pub fn new_from_file_rank(file: u8, rank: u8) -> Self {
+    // NOTE: Unlike in algebraic notation where files and ranks are from 1 to 8, 
+    // this function accepts values from 0 to 7
+    pub fn new_from_file_rank(file: u8, rank: u8) -> Option<Square> {
         if rank > 7 || file > 7 {
-            panic!("Attempted to create square with file: {} or rank: {} vith values more then 7", file, rank);
+            return None;
         }
-        // Since values from 0 to 7 can be stored in only 3 bits (4 for ease of use) we can store file and rank as a single u8 value
-        // Example: 00100011 -> 00
-        
+
         // << 3 is equal to 2^3 or 8, but faster to compute (like its even matter aha)
         let rank_file_as_index: u8 = (rank << 3) + file;
-        Square(rank_file_as_index)
+        Some(Square(rank_file_as_index))
     }
-    pub fn new_from_algebraic_notation(coords: &str) -> Self {
+    pub fn new_from_algebraic_notation(coords: &str) -> Option<Square> {
         let file = match coords.chars().nth(0).unwrap() {
             'a' => 0,
             'b' => 1,
@@ -73,7 +73,7 @@ impl Square {
             'f' => 5,
             'g' => 6,
             'h' => 7,
-            _ => panic!("Invalid file in coordinates"),
+            _ => return None,
         };
         let rank = match coords.chars().nth(1).unwrap() {
             '1' => 0,
@@ -84,8 +84,10 @@ impl Square {
             '6' => 5,
             '7' => 6,
             '8' => 7,
-            _ => panic!("Invalid rank in coordinates"),
+            _ => return None,
         };
+        // It does not make sense to unwrup it to then wrap to some,
+        // Even that we know that on this stage values for file and rank are 100% legal
         Self::new_from_file_rank(file, rank)
     }
     pub fn get_index(&self) -> usize {
@@ -93,8 +95,8 @@ impl Square {
     }
     pub fn get_file_rank(&self) -> (u8, u8) {
         let rank: u8 = self.0 >> 3;
-        let file: u8 = self.0 % BOARD_SIDE_LENGHT as u8;
-        
+        let file: u8 = self.0 % BOARD_SIDE_LENGTH;
+
         (file, rank)
     }
 }

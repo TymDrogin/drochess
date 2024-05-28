@@ -1,5 +1,5 @@
 use crate::gamestate::{
-    board::{Board, Side},
+    board::*,
     defs::{CastlingRights, CastlingSide},
     Gamestate,
 };
@@ -29,6 +29,17 @@ pub const BLACK_BISHOP: char = 'b';
 pub const BLACK_KNIGHT: char = 'n';
 pub const BLACK_PAWN: char = 'p';
 
+// This constants mainly used in a board parsing to determine how to increment file index
+// 
+pub const ONE: char = '1';
+pub const TWO: char = '2';
+pub const THREE: char = '3';
+pub const FOUR: char = '4';
+pub const FIVE: char = '5';
+pub const SIX: char = '6';
+pub const SEVEN: char = '7';
+pub const EIGHT: char = '8';
+
 // Side symbols
 const WHITE_SIDE: char = 'w';
 const BLACK_SIDE: char = 'b';
@@ -53,8 +64,8 @@ pub enum FenError {
     #[error("FEN stiring given has invalid number of elements of `{0}`, expected 6")]
     InvalidNumOfElements(usize),
 
-    #[error("Error in 1 part of FEN: Invalid board layout, colors or symbols")]
-    PieceLayout,
+    #[error("Error in 1 part of FEN: `{0}` ")]
+    PieceLayout(String),
     #[error("Error in 2 part of FEN:  Colors")]
     StartingSide,
     #[error("Error in 3 part of FEN:  Castling rights")]
@@ -69,7 +80,7 @@ pub enum FenError {
 pub type FenResult = Result<Gamestate, FenError>;
 
 // Fen struct is used to independently implement fen logic,
-// Instead of having it be a part of Gamestate
+// instead of having it be a part of Gamestate
 pub struct Fen(pub String);
 impl Fen {
     pub fn process(&self) -> FenResult {
@@ -96,9 +107,53 @@ impl Fen {
     }
 
     fn get_board(s: &str) -> Result<Board, FenError> {
-        let mut board: Board;
+        let fen_ranks: Vec<&str> = s.split(SPLITTER).collect();
+        if (fen_ranks.len()) != 8 {
+            return Err(FenError::PieceLayout(format!("The number of board ranks is not equal to 8, ranks number = `{}`", fen_ranks.len())));
+        }
 
-        let piece_layout: Vec<&str> = s.split(SPLITTER).collect();
+        let mut board = Board::new();
+        for (rank_index, rank) in fen_ranks.iter().enumerate() {
+
+            let mut file_index:u8 = 0;
+            for piece in rank.chars() {
+                if piece.is_digit(10) {
+                    let empty_squares = piece.to_digit(10).unwrap() as u8;
+                    if !(1..=8).contains(&empty_squares) {
+                        return Err(FenError::PieceLayout(format!("Invalid number of empty squares: {}, at rank {}, file index {}", empty_squares, rank_index + 1, file_index + 1)));
+                    }
+
+                    file_index += empty_squares;
+                    continue;
+                }
+                if file_index > BOARD_SIDE_LENGTH - 1 {
+                    return Err(FenError::PieceLayout(format!("File index value is more than 8, file index = `{}`",file_index)));
+                }
+
+                let square = match Square::new_from_file_rank(file_index, rank_index as u8) {
+                    Some(s) => s,
+                    None => return Err(FenError::PieceLayout("Invalid file or rank had been passed".to_string())),
+                };
+                match piece {
+                    WHITE_KING   => board.set_square(square, PieceType::King, Side::White),
+                    WHITE_QUEEN  => board.set_square(square, PieceType::Queen, Side::White),
+                    WHITE_ROOK   => board.set_square(square, PieceType::Rook, Side::White),
+                    WHITE_BISHOP => board.set_square(square, PieceType::Bishop, Side::White),
+                    WHITE_KNIGHT => board.set_square(square, PieceType::Knight, Side::White),
+                    WHITE_PAWN   => board.set_square(square, PieceType::Pawn, Side::White),
+
+                    BLACK_KING   => board.set_square(square, PieceType::King, Side::Black),
+                    BLACK_QUEEN  => board.set_square(square, PieceType::Queen, Side::Black),
+                    BLACK_ROOK   => board.set_square(square, PieceType::Rook, Side::Black),
+                    BLACK_BISHOP => board.set_square(square, PieceType::Bishop, Side::Black),
+                    BLACK_KNIGHT => board.set_square(square, PieceType::Knight, Side::Black),
+                    BLACK_PAWN   => board.set_square(square, PieceType::Pawn, Side::Black),
+
+                    _ => return Err(FenError::PieceLayout(format!("Invalid symbol '\"'`{}`'\"' had been encountered", piece)))
+                }
+            }
+        }
+
         todo!()
     }
     fn get_side_to_move(s: &str) -> Result<Side, FenError> {
@@ -112,14 +167,13 @@ impl Fen {
             _ => Err(FenError::StartingSide),
         }
     }
-    // That is a lot of code as a consequence of me refusing to use flag bits and using ideomatic enums
     fn get_castling_rights(s: &str) -> Result<CastlingRights, FenError> {
-        if s.len() > 4 {
+        if s.len() != 4 {
             return Err(FenError::CastlingRights);
         }
 
         let mut cr = CastlingRights::new();
-        for _ in 0..3 {
+        for _ in 0..=3 {
             match s.chars().next() {
                 Some(WHITE_KINGSIDE) => cr.set_for_side(Side::White, CastlingSide::Kingside),
                 Some(WHITE_QUEENSIDE) => cr.set_for_side(Side::White, CastlingSide::Queenside),
@@ -130,9 +184,21 @@ impl Fen {
         }
         Ok(cr)
     }
-
-    fn get_en_passant(s: &str) -> Result<Option<u8>, FenError> {
-        todo!()
+    fn get_en_passant(s: &str) -> Result<u8, FenError> {
+        if s == "-" {
+            return Ok(0 as u8);
+        }
+        if s.len() != 2 {
+            return Err(FenError::EnPassant);
+        }
+        match Square::new_from_algebraic_notation(s) {
+            Some(sq) => {
+                let (_, rank) = sq.get_file_rank();
+                let en_passant = 1 << rank;
+                Ok(en_passant)
+            }
+            None => Err(FenError::EnPassant),
+        }
     }
     fn get_half_move_clock(s: &str) -> Result<u8, FenError> {
         match s.parse::<u8>() {

@@ -4,6 +4,8 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
+
         {
             "type": "lldb",
             "request": "launch",
@@ -12,5 +14,12 @@
             "args": [],
             "cwd": "${workspaceFolder}"
         }
-    ]
+    ],
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "rust-analyzer.rustfmt.enableRangeFormatting": true,
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer", 
+        "editor.formatOnSave": true 
+    },
 }
