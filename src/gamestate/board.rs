@@ -23,6 +23,21 @@ impl Board {
             Side::Black => self.black_pieces[pt as usize] |= mask,
         }
     }
+    pub fn get_piece_at_square(&self, square: Square) -> Option<(PieceType, Side)> {
+        let piece_mask = 1 << square.get_index();
+
+        // if mask is 00001000 and pieces are 010001000 the result of AND operation will be non zero,
+        // thus condition will work 
+        for i in 0..=PIECE_TYPES_NUM - 1 {
+            if piece_mask & self.white_pieces[i] != 0 {
+                return Some((PieceType::new_from_int(i), Side::White));
+            }
+            if piece_mask & self.black_pieces[i] != 0 {
+                return Some((PieceType::new_from_int(i), Side::Black));
+            }
+        }
+        return None
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -34,6 +49,21 @@ pub enum PieceType {
     Queen,
     King,
 }
+impl PieceType {
+    pub fn new_from_int(i: usize) -> Self {
+        match i {
+            0 => PieceType::Pawn,
+            1 => PieceType::Knight,
+            2 => PieceType::Bishop,
+            3 => PieceType::Rook,
+            4 => PieceType::Queen,
+            5 => PieceType::King,
+            _ => panic!("Invalid int to piece type convertion"),
+        }
+    }
+}
+
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Side {
     White,
@@ -98,5 +128,5 @@ impl Square {
         let file: u8 = self.0 % BOARD_SIDE_LENGTH;
 
         (file, rank)
-    }
+    } 
 }
