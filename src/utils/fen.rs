@@ -29,17 +29,6 @@ pub const BLACK_BISHOP: char = 'b';
 pub const BLACK_KNIGHT: char = 'n';
 pub const BLACK_PAWN: char = 'p';
 
-// This constants mainly used in a board parsing to determine how to increment file index
-// 
-pub const ONE: char = '1';
-pub const TWO: char = '2';
-pub const THREE: char = '3';
-pub const FOUR: char = '4';
-pub const FIVE: char = '5';
-pub const SIX: char = '6';
-pub const SEVEN: char = '7';
-pub const EIGHT: char = '8';
-
 // Side symbols
 const WHITE_SIDE: char = 'w';
 const BLACK_SIDE: char = 'b';
@@ -108,53 +97,62 @@ impl Fen {
 
     fn get_board(s: &str) -> Result<Board, FenError> {
         let fen_ranks: Vec<&str> = s.split(SPLITTER).collect();
-        if (fen_ranks.len()) != 8 {
+        if fen_ranks.len() != 8 {
             return Err(FenError::PieceLayout(format!("The number of board ranks is not equal to 8, ranks number = `{}`", fen_ranks.len())));
         }
-
+    
         let mut board = Board::new();
         for (rank_index, rank) in fen_ranks.iter().enumerate() {
-
-            let mut file_index:u8 = 0;
+            if rank_index >= BOARD_SIDE_LENGTH as usize {
+                return Err(FenError::PieceLayout(format!("Rank index value is more than 8, rank index = `{}`", rank_index)));
+            }
+    
+            let mut file_index: u8 = 0;
             for piece in rank.chars() {
                 if piece.is_digit(10) {
                     let empty_squares = piece.to_digit(10).unwrap() as u8;
                     if !(1..=8).contains(&empty_squares) {
                         return Err(FenError::PieceLayout(format!("Invalid number of empty squares: {}, at rank {}, file index {}", empty_squares, rank_index + 1, file_index + 1)));
                     }
-
+    
                     file_index += empty_squares;
                     continue;
                 }
-                if file_index > BOARD_SIDE_LENGTH - 1 {
-                    return Err(FenError::PieceLayout(format!("File index value is more than 8, file index = `{}`",file_index)));
+                if file_index >= BOARD_SIDE_LENGTH {
+                    return Err(FenError::PieceLayout(format!("File index value is more than 8, file index = `{}`", file_index)));
                 }
-
-                let square = match Square::new_from_file_rank(file_index, rank_index as u8) {
+    
+                let square = match Square::new_from_file_rank(7 - file_index, 7 - rank_index as u8) {
                     Some(s) => s,
                     None => return Err(FenError::PieceLayout("Invalid file or rank had been passed".to_string())),
                 };
+    
                 match piece {
-                    WHITE_KING   => board.set_square(square, PieceType::King, Side::White),
-                    WHITE_QUEEN  => board.set_square(square, PieceType::Queen, Side::White),
-                    WHITE_ROOK   => board.set_square(square, PieceType::Rook, Side::White),
+                    WHITE_KING => board.set_square(square, PieceType::King, Side::White),
+                    WHITE_QUEEN => board.set_square(square, PieceType::Queen, Side::White),
+                    WHITE_ROOK => board.set_square(square, PieceType::Rook, Side::White),
                     WHITE_BISHOP => board.set_square(square, PieceType::Bishop, Side::White),
                     WHITE_KNIGHT => board.set_square(square, PieceType::Knight, Side::White),
-                    WHITE_PAWN   => board.set_square(square, PieceType::Pawn, Side::White),
-
-                    BLACK_KING   => board.set_square(square, PieceType::King, Side::Black),
-                    BLACK_QUEEN  => board.set_square(square, PieceType::Queen, Side::Black),
-                    BLACK_ROOK   => board.set_square(square, PieceType::Rook, Side::Black),
+                    WHITE_PAWN => board.set_square(square, PieceType::Pawn, Side::White),
+    
+                    BLACK_KING => board.set_square(square, PieceType::King, Side::Black),
+                    BLACK_QUEEN => board.set_square(square, PieceType::Queen, Side::Black),
+                    BLACK_ROOK => board.set_square(square, PieceType::Rook, Side::Black),
                     BLACK_BISHOP => board.set_square(square, PieceType::Bishop, Side::Black),
                     BLACK_KNIGHT => board.set_square(square, PieceType::Knight, Side::Black),
-                    BLACK_PAWN   => board.set_square(square, PieceType::Pawn, Side::Black),
-
-                    _ => return Err(FenError::PieceLayout(format!("Invalid symbol '\"'`{}`'\"' had been encountered", piece)))
+                    BLACK_PAWN => board.set_square(square, PieceType::Pawn, Side::Black),
+    
+                    _ => return Err(FenError::PieceLayout(format!("Invalid symbol '{}' encountered", piece))),
                 }
+                file_index += 1;
+            }
+    
+            if file_index != BOARD_SIDE_LENGTH {
+                return Err(FenError::PieceLayout(format!("Rank {} does not have exactly 8 squares", rank_index + 1)));
             }
         }
-
-        todo!()
+    
+        Ok(board)
     }
     fn get_side_to_move(s: &str) -> Result<Side, FenError> {
         if s.len() != 1 {
