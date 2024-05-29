@@ -1,5 +1,5 @@
 use crate::gamestate::{board::*, Gamestate};
-use std::fmt::{self, write, Display};
+use std::fmt::{self, Display};
 
 pub const WHITE_PAWN: char = '♙';
 pub const WHITE_KNIGHT: char = '♘';
@@ -23,7 +23,8 @@ impl Display for Gamestate {
             for file in 0..BOARD_SIDE_LENGTH {
                 let square: Square;
 
-                // Depending on the current player to move it will "turn" the board to the player
+                // Depending on the current player to move it will "turn" the board
+                // using reversed indexing
                 match self.side_to_move {
                     Side::White => {square = Square::new_from_file_rank(7 - file, 7 - rank).unwrap()},
                     Side::Black => {square = Square::new_from_file_rank(file, rank).unwrap()},
@@ -38,6 +39,7 @@ impl Display for Gamestate {
                         (PieceType::Rook, Side::White) => WHITE_ROOK,
                         (PieceType::Queen, Side::White) => WHITE_QUEEN,
                         (PieceType::King, Side::White) => WHITE_KING,
+
                         (PieceType::Pawn, Side::Black) => BLACK_PAWN,
                         (PieceType::Knight, Side::Black) => BLACK_KNIGHT,
                         (PieceType::Bishop, Side::Black) => BLACK_BISHOP,

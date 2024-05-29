@@ -16,24 +16,22 @@ impl Board {
         }
     }
     pub fn set_square(&mut self, square: Square, pt: PieceType, side: Side) {
-        let mask: Bitboard = 1 << square.get_index();
+        let piece_mask = square.get_mask();
 
         match side {
-            Side::White => self.white_pieces[pt as usize] |= mask,
-            Side::Black => self.black_pieces[pt as usize] |= mask,
+            Side::White => self.white_pieces[pt as usize] |= piece_mask,
+            Side::Black => self.black_pieces[pt as usize] |= piece_mask,
         }
     }
     pub fn get_piece_at_square(&self, square: Square) -> Option<(PieceType, Side)> {
-        let piece_mask = 1 << square.get_index();
+        let piece_mask = square.get_mask();
 
-        // if mask is 00001000 and pieces are 010001000 the result of AND operation will be non zero,
-        // thus condition will work 
         for i in 0..=PIECE_TYPES_NUM - 1 {
             if piece_mask & self.white_pieces[i] != 0 {
-                return Some((PieceType::new_from_int(i), Side::White));
+                return Some((PieceType::new_from_usize(i), Side::White));
             }
             if piece_mask & self.black_pieces[i] != 0 {
-                return Some((PieceType::new_from_int(i), Side::Black));
+                return Some((PieceType::new_from_usize(i), Side::Black));
             }
         }
         return None
@@ -50,7 +48,7 @@ pub enum PieceType {
     King,
 }
 impl PieceType {
-    pub fn new_from_int(i: usize) -> Self {
+    pub fn new_from_usize(i: usize) -> Self {
         match i {
             0 => PieceType::Pawn,
             1 => PieceType::Knight,
@@ -62,7 +60,6 @@ impl PieceType {
         }
     }
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Side {
@@ -83,7 +80,7 @@ impl Square {
         Self(index)
     }
     // NOTE: Unlike in algebraic notation where files and ranks are from 1 to 8, 
-    // this function accepts values from 0 to 7
+    // this function accepts values from 0 to 7, because it simplify using it in the loops
     pub fn new_from_file_rank(file: u8, rank: u8) -> Option<Square> {
         if rank > 7 || file > 7 {
             return None;
@@ -124,9 +121,13 @@ impl Square {
         self.0 as usize
     }
     pub fn get_file_rank(&self) -> (u8, u8) {
+
         let rank: u8 = self.0 >> 3;
         let file: u8 = self.0 % BOARD_SIDE_LENGTH;
 
         (file, rank)
     } 
+    pub fn get_mask(&self) -> Bitboard {
+        ((1 as u64) << (self.0 as u64)) as Bitboard
+    }
 }
