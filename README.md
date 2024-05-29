@@ -35,3 +35,9 @@ So far not many things are implemented, howewer the journey is quite enjoyable.
 After building the project, you can run the chess engine using:
 ```sh
 cargo run
+
+Unit test are can be run using:
+```sh
+cargo test
+
+Becnhmarks are not yet implemented, howewer it is planed.
