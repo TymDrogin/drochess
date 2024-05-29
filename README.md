@@ -1,8 +1,7 @@
 # Rusty Chess Engine
 
 Rusty Chess Engine is a simple chess engine I am working on in my free time.
-So far not many things are implemented, howewer the journey is quite enjoyable. The enums and states are pretty neat 
-features of rust that helped me get rid of bugs before i even got to run a code. 
+So far not many things are implemented, howewer the journey is quite enjoyable.
 
 ## Features
 
