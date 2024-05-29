@@ -37,7 +37,7 @@ After building the project, you can run the chess engine using:
 cargo run
 ```
 
-Unit test are can be run using:
+Unit test can be run using:
 ```sh
 cargo test
 ```
