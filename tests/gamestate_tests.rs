@@ -44,18 +44,16 @@ mod tests {
 
         let square = Square::new_from_file_rank(3, 4).unwrap();
         board.set_square(square, PieceType::Knight, Side::White);
-        println!("{}", square.get_index());
         assert_eq!(
             board.white_pieces[PieceType::Knight as usize],
-            1 << square.get_index() as Bitboard
+            square.get_mask()
         );
 
         let square = Square::new_from_file_rank(7, 7).unwrap();
-        println!("{}", square.get_index());
         board.set_square(square, PieceType::Queen, Side::Black);
         assert_eq!(
             board.black_pieces[PieceType::Queen as usize],
-            1 << square.get_index() as Bitboard
+            square.get_mask()
         );
     }
 
