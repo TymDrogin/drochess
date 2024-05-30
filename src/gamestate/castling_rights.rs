@@ -20,9 +20,9 @@ impl CastlingSide {
         }
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 
 // structure is as follows: 0000(garbage bits), 00(black bits), 00(white bits) -> 0000****
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CastlingRights(u8);
 impl CastlingRights {
     pub fn new() -> Self {
