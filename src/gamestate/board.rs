@@ -2,6 +2,34 @@ pub const PIECE_TYPES_NUM: usize = 6;
 pub const BOARD_SIDE_LENGTH: u8 = 8;
 
 pub type Bitboard = u64;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PieceType {
+    Pawn,
+    Knight,
+    Bishop,
+    Rook,
+    Queen,
+    King,
+}
+impl PieceType {
+    pub fn new_from_usize(i: usize) -> Self {
+        match i {
+            0 => PieceType::Pawn,
+            1 => PieceType::Knight,
+            2 => PieceType::Bishop,
+            3 => PieceType::Rook,
+            4 => PieceType::Queen,
+            5 => PieceType::King,
+            _ => panic!("Invalid int to piece type convertion"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Side {
+    White,
+    Black,
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Board {
@@ -36,35 +64,6 @@ impl Board {
         }
         return None
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PieceType {
-    Pawn,
-    Knight,
-    Bishop,
-    Rook,
-    Queen,
-    King,
-}
-impl PieceType {
-    pub fn new_from_usize(i: usize) -> Self {
-        match i {
-            0 => PieceType::Pawn,
-            1 => PieceType::Knight,
-            2 => PieceType::Bishop,
-            3 => PieceType::Rook,
-            4 => PieceType::Queen,
-            5 => PieceType::King,
-            _ => panic!("Invalid int to piece type convertion"),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Side {
-    White,
-    Black,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
