@@ -1,5 +1,14 @@
-use crate::gamestate::{board::*, Gamestate};
+use crate::gamestate::{
+    board::*,
+    castling_rights::{
+        CastlingRights,
+        CastlingSide,
+    },
+    Gamestate
+};
 use std::fmt::{self, Display};
+
+const PRINT_METADATA: bool = true;
 
 pub const WHITE_PAWN: char = '♙';
 pub const WHITE_KNIGHT: char = '♘';
@@ -18,6 +27,7 @@ pub const EMPTY: char = '.';
 
 impl Display for Gamestate {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Print board
         writeln!(f, "a b c d e f g h")?;
         for rank in (0..BOARD_SIDE_LENGTH).rev() {
             for file in 0..BOARD_SIDE_LENGTH {
@@ -51,6 +61,37 @@ impl Display for Gamestate {
                 write!(f, "{} ", piece_char)?;
             }
             writeln!(f, "{}", rank + 1)?;
+        }
+        if PRINT_METADATA {
+            let white_rights: CastlingSide = self.castling_rights.get_for_side(Side::White);
+            let black_rights: CastlingSide = self.castling_rights.get_for_side(Side::Black);
+        
+            writeln!(f)?;
+            
+            // Print White castling rights
+            write!(f, "White castling rights: ")?;
+            match white_rights {
+                CastlingSide::None => writeln!(f, "None")?,
+                CastlingSide::Kingside => writeln!(f, "Kingside")?,
+                CastlingSide::Queenside => writeln!(f, "Queenside")?,
+                CastlingSide::Both => writeln!(f, "Kingside and Queenside")?,
+            
+            }
+
+            // Print Black castling rights
+            write!(f, "Black castling rights: ")?;
+            match black_rights {
+                CastlingSide::None => writeln!(f, "None")?,
+                CastlingSide::Kingside => writeln!(f, "Kingside")?,
+                CastlingSide::Queenside => writeln!(f, "Queenside")?,
+                CastlingSide::Both => writeln!(f, "Kingside and Queenside")?,
+            }
+
+            // Print clocks
+            write!(f, "Half move clock: {0}", self.half_move_clock)?;
+            writeln!(f)?;
+            write!(f, "Full move counter: {0}", self.full_move_count)?;
+            writeln!(f)?;
         }
         Ok(())
     }

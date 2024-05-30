@@ -38,12 +38,17 @@ impl CastlingRights {
         }
     }
     pub fn get_for_side(&self, side: Side) -> CastlingSide {
-        const WHITE_MASK: u8 = 0b0000_00_11; 
-        const BLACK_MASK: u8 = 0b0000_11_00;
+        const MASK: u8 = 0b0000_00_11; 
+        let cs: CastlingSide;
         match side {
-            Side::White => CastlingSide::get_from_u8(self.0 & WHITE_MASK).unwrap(),
-            Side::Black => CastlingSide::get_from_u8(self.0 & BLACK_MASK >> BLACK_SIDE_OFFSET).unwrap(),
+            Side::White => {
+                cs = CastlingSide::get_from_u8(self.0 & MASK).unwrap();
+            },
+            Side::Black => {
+                cs = CastlingSide::get_from_u8(self.0 & (MASK << BLACK_SIDE_OFFSET) >> BLACK_SIDE_OFFSET).unwrap();
+            },
         }
+        return cs
     }
     // If castling occures rules should be completely disabled for the side that castled
     pub fn disable_full_side(&mut self, side: Side) {

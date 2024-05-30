@@ -1,6 +1,6 @@
 use crate::gamestate::{
     board::*,
-    defs::{CastlingRights, CastlingSide},
+    castling_rights::{CastlingRights, CastlingSide},
     Gamestate,
 };
 use core::str;
@@ -144,11 +144,12 @@ impl Fen {
     
                     _ => return Err(FenError::PieceLayout(format!("Invalid symbol '{}' encountered", piece))),
                 }
+                // Increment index
                 file_index += 1;
             }
     
             if file_index != BOARD_SIDE_LENGTH {
-                return Err(FenError::PieceLayout(format!("Rank {} does not have exactly 8 squares", rank_index + 1)));
+                return Err(FenError::PieceLayout(format!("By the end of the rank, file does not have exactly 8 squares, but {}", file_index)));
             }
         }
     
@@ -171,12 +172,12 @@ impl Fen {
         }
 
         let mut cr = CastlingRights::new();
-        for _ in 0..=3 {
-            match s.chars().next() {
-                Some(WHITE_KINGSIDE) => cr.set_for_side(Side::White, CastlingSide::Kingside),
-                Some(WHITE_QUEENSIDE) => cr.set_for_side(Side::White, CastlingSide::Queenside),
-                Some(BLACK_KINGSIDE) => cr.set_for_side(Side::Black, CastlingSide::Kingside),
-                Some(BLACK_QUEENSIDE) => cr.set_for_side(Side::Black, CastlingSide::Queenside),
+        for ch in s.chars() {
+            match ch {
+                WHITE_KINGSIDE  => cr.set_for_side(Side::White, CastlingSide::Kingside),
+                WHITE_QUEENSIDE => cr.set_for_side(Side::White, CastlingSide::Queenside),
+                BLACK_KINGSIDE  => cr.set_for_side(Side::Black, CastlingSide::Kingside),
+                BLACK_QUEENSIDE => cr.set_for_side(Side::Black, CastlingSide::Queenside),
                 _ => return Err(FenError::CastlingRights),
             }
         }

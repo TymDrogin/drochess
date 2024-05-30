@@ -1,9 +1,9 @@
 pub mod board;
-pub mod defs;
+pub mod castling_rights;
 
 use self::{
     board::{Board, Side},
-    defs::CastlingRights,
+    castling_rights::CastlingRights,
 };
 
 #[derive(Debug, Clone, PartialEq)]

@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use rusty_chess_engine::gamestate::{board::*, defs::*};
+    use rusty_chess_engine::gamestate::{board::*, castling_rights::*};
 
     #[test]
     fn test_square_new_from_file_rank() {
