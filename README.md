@@ -9,6 +9,10 @@ So far not many things are implemented, howewer the journey is quite enjoyable.
 - **FEN Processor**: Parse and process FEN strings to initialize the board state.
 - **Board Display**: Nicely formatted board display in the console.
 
+- **Rayon**: Engine uses paralellisation whenever it is possible
+- **Thiserror**: Engine has extensive error processing
+
+
 ## Getting Started
 
 ### Prerequisites
