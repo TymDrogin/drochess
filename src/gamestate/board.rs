@@ -1,3 +1,7 @@
+use std::fmt::Binary;
+
+use rayon::prelude::*;
+
 pub const PIECE_TYPES_NUM: usize = 6;
 pub const BOARD_SIDE_LENGTH: u8 = 8;
 
@@ -43,14 +47,6 @@ impl Board {
             black_pieces: [0; PIECE_TYPES_NUM],
         }
     }
-    pub fn set_square(&mut self, square: Square, pt: PieceType, side: Side) {
-        let piece_mask = square.get_mask();
-
-        match side {
-            Side::White => self.white_pieces[pt as usize] |= piece_mask,
-            Side::Black => self.black_pieces[pt as usize] |= piece_mask,
-        }
-    }
     pub fn get_piece_at_square(&self, square: Square) -> Option<(PieceType, Side)> {
         let piece_mask = square.get_mask();
 
@@ -64,6 +60,35 @@ impl Board {
         }
         return None
     }
+    pub fn place_piece_at_square(&mut self, square: Square, pt: PieceType, side: Side) {
+        let piece_mask = square.get_mask();
+
+        match side {
+            Side::White => self.white_pieces[pt as usize] |= piece_mask,
+            Side::Black => self.black_pieces[pt as usize] |= piece_mask,
+        }
+    }
+    pub fn remove_piece_at_square(&mut self, square: Square, pt: PieceType, side: Side) {
+        let piece_mask = !square.get_mask();
+        match side {
+            Side::White => self.white_pieces[pt as usize] &= piece_mask,
+            Side::Black => self.black_pieces[pt as usize] &= piece_mask,
+        }
+    }
+    // Clears the square for any piece and side
+    pub fn clear_square(&mut self, square: Square) {
+        let piece_mask = !square.get_mask();
+        // Clear the square for white pieces
+        self.white_pieces.par_iter_mut().for_each(|i| {
+            *i &= piece_mask;
+        });
+
+        // Clear the square for black pieces
+        self.black_pieces.par_iter_mut().for_each(|i| {
+            *i &= piece_mask;
+        });
+    }
+    
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -128,5 +153,17 @@ impl Square {
     } 
     pub fn get_mask(&self) -> Bitboard {
         ((1 as u64) << (self.0 as u64)) as Bitboard
+    }
+    pub fn get_squares_from_bitboard(bitboard: Bitboard) -> Vec<Square> {
+        (0..64)
+            .into_par_iter()
+            .filter_map(|i| {
+                if (bitboard & (1u64 << i)) != 0 {
+                    Some(Square::new(i as u8))
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 }
