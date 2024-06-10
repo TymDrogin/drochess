@@ -37,23 +37,115 @@ mod tests {
         let (file, rank) = square.get_file_rank();
         assert_eq!((file, rank), (7, 7));
     }
+    #[test]
+    fn test_get_squares_from_bitboard() {
+        let bitboard: u64 = 0b10101010; // Example bitboard with bits 1, 3, 5, 7 set
+        let squares = Square::get_squares_from_bitboard(bitboard);
+        let expected_squares: Vec<Square> = vec![
+            Square::new(1),
+            Square::new(3),
+            Square::new(5),
+            Square::new(7),
+        ];
+        assert_eq!(squares, expected_squares);
+
+        let bitboard: u64 = 0b1000000000000000000000000000000000000000000000000000000000000000; // Only the 63rd bit is set
+        let squares = Square::get_squares_from_bitboard(bitboard);
+        let expected_squares: Vec<Square> = vec![Square::new(63)];
+        assert_eq!(squares, expected_squares);
+
+        let bitboard: u64 = 0; // No bits set
+        let squares = Square::get_squares_from_bitboard(bitboard);
+        let expected_squares: Vec<Square> = vec![];
+        assert_eq!(squares, expected_squares);
+    }
 
     #[test]
-    fn test_board_set_square() {
+    fn test_board_place_piece_at_square() {
         let mut board = Board::new();
 
         let square = Square::new_from_file_rank(3, 4).unwrap();
-        board.set_square(square, PieceType::Knight, Side::White);
+        board.place_piece_at_square(square, PieceType::Knight, Side::White);
         assert_eq!(
             board.white_pieces[PieceType::Knight as usize],
             square.get_mask()
         );
 
         let square = Square::new_from_file_rank(7, 7).unwrap();
-        board.set_square(square, PieceType::Queen, Side::Black);
+        board.place_piece_at_square(square, PieceType::Queen, Side::Black);
         assert_eq!(
             board.black_pieces[PieceType::Queen as usize],
             square.get_mask()
+        );
+    }
+
+    #[test]
+    fn test_board_remove_piece_at_square() {
+        let mut board = Board::new();
+
+        // Place a white knight on the board at (3, 4)
+        let square_knight = Square::new_from_file_rank(3, 4).unwrap();
+        board.place_piece_at_square(square_knight, PieceType::Knight, Side::White);
+        assert_eq!(
+            board.white_pieces[PieceType::Knight as usize],
+            square_knight.get_mask() as Bitboard
+        );
+
+        // Place a black queen on the board at (7, 7)
+        let square_queen = Square::new_from_file_rank(7, 7).unwrap();
+        board.place_piece_at_square(square_queen, PieceType::Queen, Side::Black);
+        assert_eq!(
+            board.black_pieces[PieceType::Queen as usize],
+            square_queen.get_mask() as Bitboard
+        );
+
+        // Remove the white knight on the board at (3, 4)
+        board.remove_piece_at_square(square_knight, PieceType::Knight, Side::White);
+        assert_eq!(
+            board.white_pieces[PieceType::Knight as usize],
+            0 as Bitboard
+        );
+
+        // Remove the black queen on the board at (3, 4)
+        board.remove_piece_at_square(square_queen, PieceType::Queen, Side::Black);
+        assert_eq!(
+            board.black_pieces[PieceType::Queen as usize],
+            0 as Bitboard
+        );
+    }
+
+    #[test]
+    fn test_board_clear_square() {
+        let mut board = Board::new();
+
+        // Place a white knight on the board at (3, 4)
+        let square_knight = Square::new_from_file_rank(3, 4).unwrap();
+        board.place_piece_at_square(square_knight, PieceType::Knight, Side::White);
+        assert_eq!(
+            board.white_pieces[PieceType::Knight as usize],
+            square_knight.get_mask()
+        );
+
+        // Place a black queen on the board at (7, 7)
+        let square_queen = Square::new_from_file_rank(7, 7).unwrap();
+        board.place_piece_at_square(square_queen, PieceType::Queen, Side::Black);
+        assert_eq!(
+            board.black_pieces[PieceType::Queen as usize],
+            square_queen.get_mask()
+        );
+
+        // Clear the white knight
+        board.clear_square(square_knight);
+        assert_eq!(
+            board.white_pieces[PieceType::Knight as usize],
+            0
+        );
+
+        // Clear the black queen
+        board.clear_square(square_queen);
+        assert_eq!(
+            board.black_pieces[PieceType::Queen as usize],
+            0
         );
     }
 
