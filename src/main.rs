@@ -1,9 +1,7 @@
 pub mod gamestate;
 mod utils;
-use utils::fen::*;
-
+mod movegen;
+use gamestate::board::Bitboard;
 fn main() {
-    let fen = Fen(DEFAULT_FEN.to_string());
-    let game = fen.process().unwrap();
-    print!("{}", game);
+    print!("Hello world")
 }
