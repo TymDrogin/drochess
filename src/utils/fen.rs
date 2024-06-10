@@ -128,19 +128,19 @@ impl Fen {
                 };
     
                 match piece {
-                    WHITE_KING => board.set_square(square, PieceType::King, Side::White),
-                    WHITE_QUEEN => board.set_square(square, PieceType::Queen, Side::White),
-                    WHITE_ROOK => board.set_square(square, PieceType::Rook, Side::White),
-                    WHITE_BISHOP => board.set_square(square, PieceType::Bishop, Side::White),
-                    WHITE_KNIGHT => board.set_square(square, PieceType::Knight, Side::White),
-                    WHITE_PAWN => board.set_square(square, PieceType::Pawn, Side::White),
+                    WHITE_KING => board.place_piece_at_square(square, PieceType::King, Side::White),
+                    WHITE_QUEEN => board.place_piece_at_square(square, PieceType::Queen, Side::White),
+                    WHITE_ROOK => board.place_piece_at_square(square, PieceType::Rook, Side::White),
+                    WHITE_BISHOP => board.place_piece_at_square(square, PieceType::Bishop, Side::White),
+                    WHITE_KNIGHT => board.place_piece_at_square(square, PieceType::Knight, Side::White),
+                    WHITE_PAWN => board.place_piece_at_square(square, PieceType::Pawn, Side::White),
     
-                    BLACK_KING => board.set_square(square, PieceType::King, Side::Black),
-                    BLACK_QUEEN => board.set_square(square, PieceType::Queen, Side::Black),
-                    BLACK_ROOK => board.set_square(square, PieceType::Rook, Side::Black),
-                    BLACK_BISHOP => board.set_square(square, PieceType::Bishop, Side::Black),
-                    BLACK_KNIGHT => board.set_square(square, PieceType::Knight, Side::Black),
-                    BLACK_PAWN => board.set_square(square, PieceType::Pawn, Side::Black),
+                    BLACK_KING => board.place_piece_at_square(square, PieceType::King, Side::Black),
+                    BLACK_QUEEN => board.place_piece_at_square(square, PieceType::Queen, Side::Black),
+                    BLACK_ROOK => board.place_piece_at_square(square, PieceType::Rook, Side::Black),
+                    BLACK_BISHOP => board.place_piece_at_square(square, PieceType::Bishop, Side::Black),
+                    BLACK_KNIGHT => board.place_piece_at_square(square, PieceType::Knight, Side::Black),
+                    BLACK_PAWN => board.place_piece_at_square(square, PieceType::Pawn, Side::Black),
     
                     _ => return Err(FenError::PieceLayout(format!("Invalid symbol '{}' encountered", piece))),
                 }
