@@ -47,13 +47,13 @@ pub const NO_NO_WE: i32 = 15;  // North-North-West
 
 // King and pawn offsets for attacks
 pub const NORTH:     i32 = 8;         // North
-pub const NORTHEAST: i32 = 7;     // Northeast
-pub const EAST:      i32 = -1;          // East
-pub const SOUTHEAST: i32 = -9;    // Southeast
+pub const NORTHEAST: i32 = 9;     // Northeast
+pub const EAST:      i32 = 1;          // East
+pub const SOUTHEAST: i32 = -7;    // Southeast
 pub const SOUTH:     i32 = -8;        // South
-pub const SOUTHWEST: i32 = -7;    // Southwest
-pub const WEST:      i32 = 1;         // West
-pub const NORTHWEST: i32 = 9;     // Northwest
+pub const SOUTHWEST: i32 = -9;    // Southwest
+pub const WEST:      i32 = -1;         // West
+pub const NORTHWEST: i32 = 7;     // Northwest
 
 // Masks used for fast computation of all the attacks for a single piece at the time.
 // Get a mask by using square index
@@ -98,12 +98,12 @@ const fn generate_king_attacks_masks() -> [Bitboard; 64] {
 
         attacks_mask |=  position_mask << NORTH;
         attacks_mask |= (position_mask << NORTHEAST) & NOT_A_FILE;
-        attacks_mask |= (position_mask >> -EAST) & NOT_A_FILE;
+        attacks_mask |= (position_mask << EAST) & NOT_A_FILE;
         attacks_mask |= (position_mask >> -SOUTHEAST) & NOT_A_FILE;
 
         attacks_mask |=  position_mask >> -SOUTH;
         attacks_mask |= (position_mask >> -SOUTHWEST) & NOT_H_FILE;
-        attacks_mask |= (position_mask << WEST) & NOT_H_FILE;
+        attacks_mask |= (position_mask >> -WEST) & NOT_H_FILE;
         attacks_mask |= (position_mask << NORTHWEST) & NOT_H_FILE;
         
 
