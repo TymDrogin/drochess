@@ -47,3 +47,8 @@ cargo test
 ```
 
 Becnhmarks are not yet implemented, howewer it is planed.
+
+
+     0100 
+0000 1000 
+1000 0000

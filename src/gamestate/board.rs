@@ -1,5 +1,3 @@
-use std::fmt::Binary;
-
 use rayon::prelude::*;
 
 pub const PIECE_TYPES_NUM: usize = 6;
@@ -147,10 +145,39 @@ impl Square {
     pub fn get_file_rank(&self) -> (u8, u8) {
 
         let rank: u8 = self.0 >> 3;
-        let file: u8 = self.0 % BOARD_SIDE_LENGTH;
+        let file: u8 = self.0 & 7;
 
         (file, rank)
     } 
+    pub fn to_algebraic_notation(&self) -> String {
+        let (file, rank) = self.get_file_rank();
+
+        let file_char = match file {
+            0 => 'a',
+            1 => 'b',
+            2 => 'c',
+            3 => 'd',
+            4 => 'e',
+            5 => 'f',
+            6 => 'g',
+            7 => 'h',
+            _ => unreachable!(), // Since file is guaranteed to be within 0..7
+        };
+
+        let rank_char = match rank {
+            0 => '1',
+            1 => '2',
+            2 => '3',
+            3 => '4',
+            4 => '5',
+            5 => '6',
+            6 => '7',
+            7 => '8',
+            _ => unreachable!(), // Since rank is guaranteed to be within 0..7
+        };
+
+        format!("{}{}", file_char, rank_char)
+    }
     pub fn get_mask(&self) -> Bitboard {
         ((1 as u64) << (self.0 as u64)) as Bitboard
     }
