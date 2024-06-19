@@ -130,10 +130,6 @@ const fn generate_pawn_attacks_masks() -> ([Bitboard; 64], [Bitboard; 64]) {
 
         black_attacks_mask |= (position_mask >> -SOUTHEAST) & NOT_A_FILE;
         black_attacks_mask |= (position_mask >> -SOUTHWEST) & NOT_H_FILE;
-
-        
-
-
         
         all_white_attacks[i] = white_attacks_mask;
         all_black_attacks[i] = black_attacks_mask;
