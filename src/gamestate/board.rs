@@ -98,6 +98,7 @@ impl Square {
     }
     // NOTE: Unlike in algebraic notation where files and ranks are from 1 to 8, 
     // this function accepts values from 0 to 7, because it simplify using it in the loops
+    #[inline(always)]
     pub const fn new_from_file_rank(file: u8, rank: u8) -> Option<Square> {
         if rank > 7 || file > 7 {
             return None;
@@ -134,9 +135,11 @@ impl Square {
         // Even that we know that on this stage values for file and rank are 100% legal
         Self::new_from_file_rank(file, rank)
     }
+    #[inline(always)]
     pub const fn get_index(&self) -> usize {
         self.0 as usize
     }
+    #[inline(always)]
     pub const fn get_file_rank(&self) -> (u8, u8) {
 
         let rank: u8 = self.0 >> 3;
@@ -173,9 +176,11 @@ impl Square {
 
         format!("{}{}", file_char, rank_char)
     }
+    #[inline(always)]
     pub fn get_mask(&self) -> Bitboard {
         ((1 as u64) << (self.0 as u64)) as Bitboard
     }
+    #[inline(always)]
     pub fn get_squares_from_bitboard(bitboard: Bitboard) -> Vec<Square> {
         (0..64)
             .into_par_iter()

@@ -87,6 +87,7 @@ impl<'a> MoveGen<'a> {
     // Then, for each square we get all the possible moves, and they are only of two types - Capture or Quiet 
     // PAwns are in thinking
     // REFACTOR: Possible split on two identical in princeple function to avoid match statements everytime 
+    #[inline(always)]
     fn get_basic_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
         let mut moves = Vec::new(); 
         //moves.extend(self.get_capture_moves_for_pieces(pieces_to_move, attack_masks)); 
@@ -94,6 +95,7 @@ impl<'a> MoveGen<'a> {
         moves.extend(self.get_capture_moves_for_pieces(pieces_to_move, attack_masks));
         moves
     }
+    #[inline(always)]
     fn get_capture_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
         let squares_with_pieces_to_move: Vec<Square> = match self.game.side_to_move {
             Side::White => Square::get_squares_from_bitboard(self.game.board.white_pieces[pieces_to_move as usize]),
@@ -115,6 +117,7 @@ impl<'a> MoveGen<'a> {
         }).collect()
 
     }
+    #[inline(always)]
     fn get_quiet_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move>{
         let squares_with_pieces_to_move: Vec<Square> = match self.game.side_to_move {
             Side::White => Square::get_squares_from_bitboard(self.game.board.white_pieces[pieces_to_move as usize]),
