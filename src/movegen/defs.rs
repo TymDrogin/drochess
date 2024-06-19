@@ -55,8 +55,14 @@ pub const NORTHWEST: i32 = 7;     // Northwest
 // Get a mask by using square index
 pub const KING_ATTAKS_MASKS:[Bitboard; 64] = generate_king_attacks_masks();
 pub const KNIGHT_ATTACKS_MASKS:[Bitboard; 64] = generate_knight_attacks_masks();
+
 pub const WHITE_PAWN_ATTACKS_MASKS: [Bitboard; 64] = generate_pawn_attacks_masks().0;
+pub const WHITE_PAWN_PUSCHES_MASKS: [Bitboard; 64] = generate_pawn_pushes_masks().0;
+
 pub const BLACK_PAWN_ATTACKS_MASKS: [Bitboard; 64] = generate_pawn_attacks_masks().1;
+pub const BLACK_PAWN_PUSHES_MASKS: [Bitboard; 64] = generate_pawn_pushes_masks().1;
+
+
 
 const fn generate_knight_attacks_masks() -> [Bitboard; 64] {
     let mut all_attacks: [Bitboard; 64] = [0; 64];
@@ -134,4 +140,32 @@ const fn generate_pawn_attacks_masks() -> ([Bitboard; 64], [Bitboard; 64]) {
         i = i + 1;
     }
     (all_white_attacks, all_black_attacks)
+}
+const fn generete_pawn_pushes_masks()  -> ([Bitboard; 64], [Bitboard; 64]) {
+    let mut all_white_pushes: [Bitboard; 64] = [0; 64];
+    let mut all_black_pushes: [Bitboard; 64] = [0; 64];
+
+    let mut i: usize = 0;
+    while i < 64 {
+        let mut white_pushes_mask: Bitboard = 0;
+        let mut black_pushes_mask: Bitboard = 0;
+
+        let position_mask = ((1 as u64) << i) as Bitboard;
+        let file = Square::new(i as u8).get_file_rank().0;
+
+        white_pushes_mask |= position_mask << NORTH;
+        if file == 1 { // Second file applies 2 square move
+            white_pushes_mask |= position_mask << (2 * NORTH);
+        }
+
+        black_pushes_mask |= position_mask >> -SOUTH;
+        if file == 6 { // Fifth file applies 2 square move
+            white_pushes_mask |= position_mask >> (2 * -SOUTH);
+        }
+        
+        all_white_pushes[i] = white_pushes_mask;
+        all_black_pushes[i] = black_pushes_mask;
+        i = i + 1;
+    }
+    (all_white_moves, all_black_moves)
 }
