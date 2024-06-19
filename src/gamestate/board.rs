@@ -93,7 +93,7 @@ impl Board {
 pub struct Square(u8);
 impl Square {
     pub const fn new(index: u8) -> Self {
-        assert!(index > 63, "Attempted to create square with index more than max of 63");
+        assert!(index <= 63, "Attempted to create square with index more than max of 63");
         Self(index)
     }
     // NOTE: Unlike in algebraic notation where files and ranks are from 1 to 8, 
