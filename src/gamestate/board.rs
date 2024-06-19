@@ -92,18 +92,13 @@ impl Board {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Square(u8);
 impl Square {
-    pub fn new(index: u8) -> Self {
-        if index > 63 {
-            panic!(
-                "Attempted to create square with index {}, which is more then max of 63",
-                index
-            );
-        }
+    pub const fn new(index: u8) -> Self {
+        assert!(index > 63, "Attempted to create square with index more than max of 63");
         Self(index)
     }
     // NOTE: Unlike in algebraic notation where files and ranks are from 1 to 8, 
     // this function accepts values from 0 to 7, because it simplify using it in the loops
-    pub fn new_from_file_rank(file: u8, rank: u8) -> Option<Square> {
+    pub const fn new_from_file_rank(file: u8, rank: u8) -> Option<Square> {
         if rank > 7 || file > 7 {
             return None;
         }
@@ -139,10 +134,10 @@ impl Square {
         // Even that we know that on this stage values for file and rank are 100% legal
         Self::new_from_file_rank(file, rank)
     }
-    pub fn get_index(&self) -> usize {
+    pub const fn get_index(&self) -> usize {
         self.0 as usize
     }
-    pub fn get_file_rank(&self) -> (u8, u8) {
+    pub const fn get_file_rank(&self) -> (u8, u8) {
 
         let rank: u8 = self.0 >> 3;
         let file: u8 = self.0 & 7;
