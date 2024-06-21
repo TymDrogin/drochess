@@ -11,7 +11,6 @@ pub const E_FILE: Bitboard = 0x1010101010101010;
 pub const F_FILE: Bitboard = 0x2020202020202020;
 pub const G_FILE: Bitboard = 0x4040404040404040;
 pub const H_FILE: Bitboard = 0x8080808080808080;
-
  
 // Rank bitmasks
 const FIRST_RANK: Bitboard = 0x0101010101010101;

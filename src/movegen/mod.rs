@@ -90,32 +90,18 @@ impl<'a> MoveGen<'a> {
     fn get_basic_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
         let mut moves = Vec::new(); 
         //moves.extend(self.get_capture_moves_for_pieces(pieces_to_move, attack_masks)); 
-        moves.extend(self.get_quiet_moves_for_pieces(pieces_to_move, attack_masks));  
         moves.extend(self.get_capture_moves_for_pieces(pieces_to_move, attack_masks));
+        moves.extend(self.get_quiet_moves_for_pieces(pieces_to_move, attack_masks));  
+        
         moves
     }
     fn get_capture_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
-        let squares_with_pieces_to_move: Vec<Square> = match self.game.side_to_move {
-            Side::White => Square::get_squares_from_bitboard(self.game.board.white_pieces[pieces_to_move as usize]),
-            Side::Black => Square::get_squares_from_bitboard(self.game.board.black_pieces[pieces_to_move as usize]),
-        };
-
-        squares_with_pieces_to_move.par_iter().flat_map(|&from| {
-            let capture_moves_bitboard = match self.game.side_to_move {
-                Side::White => (attack_masks[from.get_index()] & self.black_occupancy) & !self.white_occupancy,
-                Side::Black => (attack_masks[from.get_index()] & self.white_occupancy) & !self.black_occupancy,
-            };
-            let capture_moves_squares = Square::get_squares_from_bitboard(capture_moves_bitboard);
-
-            capture_moves_squares.into_par_iter().map(move |capture| Move {
-                from,
-                to: capture,
-                type_of: MoveType::Capture,
-            })
-        }).collect()
-
+        match self.game.side_to_move {
+            Side::White => self.get_capture_moves_for_white_pieces(pieces_to_move, attack_masks),
+            Side::Black => self.get_capture_moves_for_black_pieces(pieces_to_move, attack_masks),
+        }
     }
-    fn get_quiet_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move>{
+    fn get_quiet_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
         let squares_with_pieces_to_move: Vec<Square> = match self.game.side_to_move {
             Side::White => Square::get_squares_from_bitboard(self.game.board.white_pieces[pieces_to_move as usize]),
             Side::Black => Square::get_squares_from_bitboard(self.game.board.black_pieces[pieces_to_move as usize]),
@@ -128,6 +114,41 @@ impl<'a> MoveGen<'a> {
                 from,
                 to: quiet,
                 type_of: MoveType::Quiet,
+            })
+        }).collect()
+    }
+
+    // This functions are used to generete moves based on attacktables(used only for pawns).
+    // This functions used for knights, pawns and kings. Sliding pieces requier a lot more additional logic,
+    // So for now thats how it works. The reason this functions exist is to pull match statement out of the loop, because the masks 
+    // need to be and with either white occupancy or black one depending on the side to move. Quiet moves don't have this condition, 
+    // So they can be kept in a single function
+
+    fn get_capture_moves_for_white_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
+        let squares_with_pieces_to_move: Vec<Square> = Square::get_squares_from_bitboard(self.game.board.white_pieces[pieces_to_move as usize]);
+
+        squares_with_pieces_to_move.par_iter().flat_map(|&from| {
+            let capture_moves_bitboard = (attack_masks[from.get_index()] & self.black_occupancy) & !self.white_occupancy;
+            let capture_moves_squares = Square::get_squares_from_bitboard(capture_moves_bitboard);
+
+            capture_moves_squares.into_par_iter().map(move |capture| Move {
+                from,
+                to: capture,
+                type_of: MoveType::Capture,
+            })
+        }).collect()
+    }
+    fn get_capture_moves_for_black_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
+        let squares_with_pieces_to_move: Vec<Square> = Square::get_squares_from_bitboard(self.game.board.black_pieces[pieces_to_move as usize]);
+
+        squares_with_pieces_to_move.par_iter().flat_map(|&from| {
+            let capture_moves_bitboard = (attack_masks[from.get_index()] & self.white_occupancy) & !self.black_occupancy;
+            let capture_moves_squares = Square::get_squares_from_bitboard(capture_moves_bitboard);
+
+            capture_moves_squares.into_par_iter().map(move |capture| Move {
+                from,
+                to: capture,
+                type_of: MoveType::Capture,
             })
         }).collect()
     }

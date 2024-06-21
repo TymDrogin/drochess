@@ -1,0 +1,1 @@
+Moving a piece on a bitboard looks like this: Piece ^= (from | to). This will clear the bit on the from square. And set the bit on the target. Thats the fun part: If the movegenerator generates this kind of code - you can move multiple pieces at once. Always in a single instruction! 
