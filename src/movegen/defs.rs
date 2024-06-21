@@ -31,10 +31,6 @@ pub const NOT_AB_FILE: Bitboard = NOT_A_FILE & NOT_B_FILE;
 pub const NOT_GH_FILE: Bitboard = NOT_G_FILE & NOT_H_FILE;
 
 // Ckeckout https://www.chessprogramming.org/Knight_Pattern for idea what they are for
-// The following offsets are adjusted for a bitboard representation,
-// where the board is indexed from 0 (h1) to 63 (a8).
-// These offsets differ from the standard linear array representation
-// provided on the Chess Programming Wiki.
 pub const NO_NO_EA: i32 = 17;  // North-North-East
 pub const NO_EA_EA: i32 = 10;  // North-East-East
 pub const SO_EA_EA: i32 = -6;  // South-East-East
@@ -58,8 +54,14 @@ pub const NORTHWEST: i32 = 7;     // Northwest
 // Get a mask by using square index
 pub const KING_ATTAKS_MASKS:[Bitboard; 64] = generate_king_attacks_masks();
 pub const KNIGHT_ATTACKS_MASKS:[Bitboard; 64] = generate_knight_attacks_masks();
+
 pub const WHITE_PAWN_ATTACKS_MASKS: [Bitboard; 64] = generate_pawn_attacks_masks().0;
+pub const WHITE_PAWN_PUSHES_MASKS: [Bitboard; 64] = generete_pawn_pushes_masks().0;
+
 pub const BLACK_PAWN_ATTACKS_MASKS: [Bitboard; 64] = generate_pawn_attacks_masks().1;
+pub const BLACK_PAWN_PUSHES_MASKS: [Bitboard; 64] = generete_pawn_pushes_masks().1;
+
+
 
 const fn generate_knight_attacks_masks() -> [Bitboard; 64] {
     let mut all_attacks: [Bitboard; 64] = [0; 64];
@@ -127,14 +129,38 @@ const fn generate_pawn_attacks_masks() -> ([Bitboard; 64], [Bitboard; 64]) {
 
         black_attacks_mask |= (position_mask >> -SOUTHEAST) & NOT_A_FILE;
         black_attacks_mask |= (position_mask >> -SOUTHWEST) & NOT_H_FILE;
-
-        
-
-
         
         all_white_attacks[i] = white_attacks_mask;
         all_black_attacks[i] = black_attacks_mask;
         i = i + 1;
     }
     (all_white_attacks, all_black_attacks)
+}
+const fn generete_pawn_pushes_masks()  -> ([Bitboard; 64], [Bitboard; 64]) {
+    let mut all_white_pushes: [Bitboard; 64] = [0; 64];
+    let mut all_black_pushes: [Bitboard; 64] = [0; 64];
+
+    let mut i: usize = 0;
+    while i < 64 {
+        let mut white_pushes_mask: Bitboard = 0;
+        let mut black_pushes_mask: Bitboard = 0;
+
+        let position_mask = ((1 as u64) << i) as Bitboard;
+        let rank = Square::new(i as u8).get_file_rank().1;
+
+        white_pushes_mask |= position_mask << NORTH;
+        if rank == 1 { // Second file applies 2 square move
+            white_pushes_mask |= position_mask << (NORTH * 2);
+        }
+
+        black_pushes_mask |= position_mask >> -SOUTH;
+        if rank == 6 { // Fifth file applies 2 square move
+            white_pushes_mask |= position_mask >> (-SOUTH * 2);
+        }
+        
+        all_white_pushes[i] = white_pushes_mask;
+        all_black_pushes[i] = black_pushes_mask;
+        i = i + 1;
+    }
+    (all_white_pushes, all_black_pushes)
 }

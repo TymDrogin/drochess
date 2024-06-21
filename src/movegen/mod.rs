@@ -40,8 +40,9 @@ impl<'a> MoveGen<'a> {
     }
 
     pub fn gererate(&self) -> Vec<Move> {
-        let mut moves = self.generate_knight_moves();
-        moves.extend(self.generate_king_moves());
+        let mut moves = Vec::new();
+        //moves.extend(self.generate_king_moves());
+        moves.extend(self.generate_pawn_moves());
         moves
     }
 
@@ -68,10 +69,18 @@ impl<'a> MoveGen<'a> {
         self.get_quiet_moves_for_pieces(PieceType::Knight, &KNIGHT_ATTACKS_MASKS)
     }
     fn generate_pawn_moves(&self) -> Vec<Move> {
-        // Unlike other piecec pawn attack mask != to the way they move. Fuck.
-        //let attack_moves = self.get_capture_moves_from_mask(PieceType::Pawn, &WHITE_PAWN_ATTACKS_MASKS);
-        //let quiet_moves = self.get_quiet_moves_from_mask(PieceType::Pawn, &BLACK_PAWN_ATTACKS_MASKS);
-        todo!()
+        let mut moves: Vec<Move> = Vec::new();
+        let attack_moves = match self.game.side_to_move {
+            Side::White => self.get_capture_moves_for_pieces(PieceType::Pawn, &WHITE_PAWN_ATTACKS_MASKS),
+            Side::Black => self.get_capture_moves_for_pieces(PieceType::Pawn, &BLACK_PAWN_ATTACKS_MASKS),
+        };
+        let quiet_moves = match self.game.side_to_move {
+            Side::White => self.get_quiet_moves_for_pieces(PieceType::Pawn, &WHITE_PAWN_PUSHES_MASKS),
+            Side::Black => self.get_quiet_moves_for_pieces(PieceType::Pawn, &BLACK_PAWN_PUSHES_MASKS),
+        };
+        moves.extend(attack_moves);
+        moves.extend(quiet_moves);
+        moves
     }
     fn generate_castling_moves(&self) -> Vec<Move> {
         // Implement castling move generation logic here
@@ -87,6 +96,7 @@ impl<'a> MoveGen<'a> {
     // Then, for each square we get all the possible moves, and they are only of two types - Capture or Quiet 
     // PAwns are in thinking
     // REFACTOR: Possible split on two identical in princeple function to avoid match statements everytime 
+    #[inline(always)]
     fn get_basic_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
         let mut moves = Vec::new(); 
         //moves.extend(self.get_capture_moves_for_pieces(pieces_to_move, attack_masks)); 
@@ -95,13 +105,14 @@ impl<'a> MoveGen<'a> {
         
         moves
     }
+    #[inline(always)]
     fn get_capture_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
         match self.game.side_to_move {
             Side::White => self.get_capture_moves_for_white_pieces(pieces_to_move, attack_masks),
             Side::Black => self.get_capture_moves_for_black_pieces(pieces_to_move, attack_masks),
         }
     }
-    fn get_quiet_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
+    fn get_quiet_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move>{
         let squares_with_pieces_to_move: Vec<Square> = match self.game.side_to_move {
             Side::White => Square::get_squares_from_bitboard(self.game.board.white_pieces[pieces_to_move as usize]),
             Side::Black => Square::get_squares_from_bitboard(self.game.board.black_pieces[pieces_to_move as usize]),

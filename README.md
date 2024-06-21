@@ -8,9 +8,13 @@ So far not many things are implemented, howewer the journey is quite enjoyable.
 - **Game States**: Full implementation of game states.
 - **FEN Processor**: Parse and process FEN strings to initialize the board state.
 - **Board Display**: Nicely formatted board display in the console.
+- **Movegen**: Bitboard based movegen. I am using rayon whenever it is possible, but performance of it is yet to be tested.
 
-- **Rayon**: Engine uses paralellisation whenever it is possible
-- **Thiserror**: Engine has extensive error processing
+## Libraries 
+    # I am trying to keep engine as small as possible, but this libraries are must have.
+- **Rayon**: Easy to use parallesation framework that used a lot in the movegen
+- **Thiserror**: Easy errors.
+- **Rand** - Self exlanatory
 
 
 ## Getting Started
@@ -47,8 +51,3 @@ cargo test
 ```
 
 Becnhmarks are not yet implemented, howewer it is planed.
-
-
-     0100 
-0000 1000 
-1000 0000

@@ -11,14 +11,11 @@ use gamestate::*;
 fn main() {
     let mut game: Gamestate = Fen(DEFAULT_FEN.to_string()).process().unwrap();
     let moves = MoveGen::new(&mut game).gererate();
-    print!("The move counter for knight is {}", moves.len());
+    print!("The move counter for pawns is {}", moves.len());
     println!();
     for mov in moves {
         print!("{}", mov.to.to_algebraic_notation());
         println!();
     }
-
-    println!("A_FILE:");
-    print_bitboard(A_FILE);
 }
 
