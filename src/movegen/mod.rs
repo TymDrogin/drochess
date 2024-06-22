@@ -1,5 +1,6 @@
 pub mod defs;
 pub mod magic_bitboards;
+pub mod masks;
 
 use crate::gamestate::{
     board::*,
@@ -112,6 +113,7 @@ impl<'a> MoveGen<'a> {
             Side::Black => self.get_capture_moves_for_black_pieces(pieces_to_move, attack_masks),
         }
     }
+    #[inline(always)]
     fn get_quiet_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move>{
         let squares_with_pieces_to_move: Vec<Square> = match self.game.side_to_move {
             Side::White => Square::get_squares_from_bitboard(self.game.board.white_pieces[pieces_to_move as usize]),
@@ -129,12 +131,9 @@ impl<'a> MoveGen<'a> {
         }).collect()
     }
 
-    // This functions are used to generete moves based on attacktables(used only for pawns).
-    // This functions used for knights, pawns and kings. Sliding pieces requier a lot more additional logic,
-    // So for now thats how it works. The reason this functions exist is to pull match statement out of the loop, because the masks 
-    // need to be and with either white occupancy or black one depending on the side to move. Quiet moves don't have this condition, 
-    // So they can be kept in a single function
-
+    // This functions are used to generete moves for piece on the side based on attack tables.
+    // It is used for knights, pawns and kings. Sliding pieces requier a lot more additional logic,
+    #[inline(always)]
     fn get_capture_moves_for_white_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
         let squares_with_pieces_to_move: Vec<Square> = Square::get_squares_from_bitboard(self.game.board.white_pieces[pieces_to_move as usize]);
 
@@ -149,6 +148,7 @@ impl<'a> MoveGen<'a> {
             })
         }).collect()
     }
+    #[inline(always)]
     fn get_capture_moves_for_black_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
         let squares_with_pieces_to_move: Vec<Square> = Square::get_squares_from_bitboard(self.game.board.black_pieces[pieces_to_move as usize]);
 
