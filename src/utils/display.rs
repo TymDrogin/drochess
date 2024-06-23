@@ -4,7 +4,8 @@ use crate::gamestate::{
         CastlingRights,
         CastlingSide,
     },
-    Gamestate
+    Gamestate,
+    Move,
 };
 use std::fmt::{self, Display};
 
@@ -94,5 +95,11 @@ impl Display for Gamestate {
             writeln!(f)?;
         }
         Ok(())
+    }
+}
+
+impl Display for Move {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        todo!()
     }
 }
