@@ -1,14 +1,23 @@
 pub mod board;
 pub mod castling_rights;
-
-
-const MOVE_TO_OFFSET: u16 = 6;
-const MOVE_FLAG_OFFSET: u16 = 12;
-
 use self::{
     board::{Board, Side, Square, PieceType, Bitboard},
     castling_rights::CastlingRights,
 };
+
+// This constants are related to moves and their encoding
+// Check https://www.chessprogramming.org/Encoding_Moves for details
+const MOVE_TO_OFFSET: u16 = 6;
+const MOVE_FLAGS_OFFSET: u16 = 12;
+
+const PROMOTION_FLAG_MASK: u16 = 0b1000;
+const CAPTURE_FLAG_MASK: u16 =   0b0100;
+const SPECIAL1_FLAG_MASK: u16 =  0b0010;
+const SPECIAL2_FLAG_MASK: u16 =  0b0001;
+
+
+
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Gamestate {
     pub board: Board,
@@ -30,14 +39,63 @@ impl Gamestate {
     
 }
 
+
+// Structure of the moves is 4 flag bits, 6 bits for the index of square to move, and 6 bits for index of square to move to
+// ****  ******  ****** - Total of 16 bits 
+// flags toIndex fromIndex
+
+pub struct Move(u16);
+impl Move {
+    fn encode(from: Square, to: Square, flags: MoveFlags) -> Move {
+        Self(
+            (from.get_index() as u16) 
+            | (to.get_index() as u16) << MOVE_TO_OFFSET
+            | (flags as u16) << MOVE_FLAGS_OFFSET
+        )
+    }
+    fn decode(&self) -> (MoveFlags, Square, Square) { // Flags, Square
+        (self.get_flags(), self.get_from_square(), self.get_to_square())
+    }
+
+    fn get_from_square(&self) -> Square {
+        Square::new((self.0 & 0b111111) as u8)
+    }
+    fn get_to_square(&self) -> Square {
+        Square::new(((self.0 >> MOVE_TO_OFFSET) & 0b111111) as u8)
+    }
+    fn get_flags(&self) -> MoveFlags {
+        MoveFlags::from_u8(((self.0 >> MOVE_FLAGS_OFFSET) & 0b001111) as u8)
+    }
+
+    fn is_capture(&self) -> bool {
+        let flags = self.get_flags() as u16;
+        (flags & CAPTURE_FLAG_MASK) != 0
+    }
+    fn is_promotion(&self) -> bool {
+        let flags = self.get_flags() as u16;
+        (flags & PROMOTION_FLAG_MASK) != 0
+    }
+    fn is_promo_capture(&self) -> bool {
+        let flags = self.get_flags() as u16;
+        (flags & PROMOTION_FLAG_MASK != 0) && (flags & CAPTURE_FLAG_MASK != 0)
+    }
+    fn is_castle(&self) -> bool {
+        let flags = self.get_flags() as u16;
+        (flags & PROMOTION_FLAG_MASK == 0) && (flags & SPECIAL1_FLAG_MASK != 0)
+    }
+
+}
+
+
 #[derive(Debug)]
-pub enum MoveFlag {
+pub enum MoveFlags {
     QuietMove =          0b0000, // 0
-    DoublePawnPush =     0b0001, // 1
+    DoublePawnPush =     0b0001, // 1 -- Can be used to set en passant bits in gamestate
     KingCastle =         0b0010, // 2
-    QueenCastle =        0b0011, // 3
-    Capture =            0b0100, // 4
+    QueenCastle =        0b0011, // 3    
+    Capture =            0b0100, // 4 
     EpCapture =          0b0101, // 5
+    // All promotions
     KnightPromotion =    0b1000, // 8
     BishopPromotion =    0b1001, // 9
     RookPromotion =      0b1010, // 10
@@ -47,51 +105,24 @@ pub enum MoveFlag {
     RookPromoCapture =   0b1110, // 14
     QueenPromoCapture =  0b1111, // 15
 }
-impl MoveFlag {
+impl MoveFlags {
     pub fn from_u8(value: u8) -> Self {
         match value {
-            0b0000 => MoveFlag::QuietMove,
-            0b0001 => MoveFlag::DoublePawnPush,
-            0b0010 => MoveFlag::KingCastle,
-            0b0011 => MoveFlag::QueenCastle,
-            0b0100 => MoveFlag::Capture,
-            0b0101 => MoveFlag::EpCapture,
-            0b1000 => MoveFlag::KnightPromotion,
-            0b1001 => MoveFlag::BishopPromotion,
-            0b1010 => MoveFlag::RookPromotion,
-            0b1011 => MoveFlag::QueenPromotion,
-            0b1100 => MoveFlag::KnightPromoCapture,
-            0b1101 => MoveFlag::BishopPromoCapture,
-            0b1110 => MoveFlag::RookPromoCapture,
-            0b1111 => MoveFlag::QueenPromoCapture,
+            0b0000 => MoveFlags::QuietMove,
+            0b0001 => MoveFlags::DoublePawnPush,
+            0b0010 => MoveFlags::KingCastle,
+            0b0011 => MoveFlags::QueenCastle,
+            0b0100 => MoveFlags::Capture,
+            0b0101 => MoveFlags::EpCapture,
+            0b1000 => MoveFlags::KnightPromotion,
+            0b1001 => MoveFlags::BishopPromotion,
+            0b1010 => MoveFlags::RookPromotion,
+            0b1011 => MoveFlags::QueenPromotion,
+            0b1100 => MoveFlags::KnightPromoCapture,
+            0b1101 => MoveFlags::BishopPromoCapture,
+            0b1110 => MoveFlags::RookPromoCapture,
+            0b1111 => MoveFlags::QueenPromoCapture,
             _ => unreachable!("Invalid move flag: {:#b}", value),
         }
     }
 }
-pub struct Move(u16);
-impl Move {
-    fn encode(from: Square, to: Square, flag: MoveFlag) -> Move {
-        Self(
-            (from.get_index() as u16) 
-            | (to.get_index() as u16) << MOVE_TO_OFFSET
-            | (flag as u16) << MOVE_FLAG_OFFSET
-        )
-    }
-    fn decode(&self) -> (MoveFlag, Square, Square) { // Flags, Square
-        let from_index = (self.0 & 0b111111) as u8;
-        let to_index = ((self.0 >> MOVE_TO_OFFSET) & 0b111111) as u8;
-        let flag = ((self.0 >> MOVE_FLAG_OFFSET) & 0b001111) as u8;
-
-        (MoveFlag::from_u8(flag), Square::new(from_index), Square::new(to_index))
-    }
-    fn get_from_index() {
-        todo!()
-    }
-    fn get_to_index() {
-
-    }
-    fn get_flags() -> MoveFlag {
-        todo!()
-    }
-}
-
