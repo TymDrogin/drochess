@@ -46,6 +46,7 @@ impl Gamestate {
 
 pub struct Move(u16);
 impl Move {
+    #[inline(always)]
     fn encode(from: Square, to: Square, flags: MoveFlags) -> Move {
         Self(
             (from.get_index() as u16) 
@@ -53,32 +54,40 @@ impl Move {
             | (flags as u16) << MOVE_FLAGS_OFFSET
         )
     }
+    #[inline(always)]
     fn decode(&self) -> (MoveFlags, Square, Square) { // Flags, Square
         (self.get_flags(), self.get_from_square(), self.get_to_square())
     }
 
+    #[inline(always)]
     fn get_from_square(&self) -> Square {
         Square::new((self.0 & 0b111111) as u8)
     }
+    #[inline(always)]
     fn get_to_square(&self) -> Square {
         Square::new(((self.0 >> MOVE_TO_OFFSET) & 0b111111) as u8)
     }
+    #[inline(always)]
     fn get_flags(&self) -> MoveFlags {
         MoveFlags::from_u8(((self.0 >> MOVE_FLAGS_OFFSET) & 0b001111) as u8)
     }
 
+    #[inline(always)]
     fn is_capture(&self) -> bool {
         let flags = self.get_flags() as u16;
         (flags & CAPTURE_FLAG_MASK) != 0
     }
+    #[inline(always)]
     fn is_promotion(&self) -> bool {
         let flags = self.get_flags() as u16;
         (flags & PROMOTION_FLAG_MASK) != 0
     }
+    #[inline(always)]
     fn is_promo_capture(&self) -> bool {
         let flags = self.get_flags() as u16;
         (flags & PROMOTION_FLAG_MASK != 0) && (flags & CAPTURE_FLAG_MASK != 0)
     }
+    #[inline(always)]
     fn is_castle(&self) -> bool {
         let flags = self.get_flags() as u16;
         (flags & PROMOTION_FLAG_MASK == 0) && (flags & SPECIAL1_FLAG_MASK != 0)
