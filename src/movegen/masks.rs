@@ -2,6 +2,7 @@ use crate::{
     gamestate::board::*,
     movegen::defs::*,
 };
+
 // Masks used for fast computation of all the attacks for a single piece at the time.
 // Get a mask by using square index
 pub const KING_ATTAKS_MASKS:[Bitboard; 64] = generate_king_attacks_masks();
@@ -14,9 +15,6 @@ pub const BLACK_PAWN_ATTACKS_MASKS: [Bitboard; 64] = generate_pawn_attacks_masks
 pub const BLACK_PAWN_PUSHES_MASKS: [Bitboard; 64] = generete_pawn_pushes_masks().1;
 
 // Castling masks
-
-
-
 
 const fn generate_knight_attacks_masks() -> [Bitboard; 64] {
     let mut all_attacks: [Bitboard; 64] = [0; 64];

@@ -7,7 +7,7 @@ use crate::gamestate::{
     castling_rights::*,
     Gamestate,
     Move, 
-    MoveType
+    MoveFlag
 };
 use defs::*;
 use masks::*;
@@ -75,14 +75,12 @@ impl<'a> MoveGen<'a> {
     }
     fn get_pawn_moves(&self) -> Vec<Move> {
         let mut moves: Vec<Move> = Vec::new();
-        let attack_moves = match self.game.side_to_move {
-            Side::White => self.get_capture_moves_for_pieces(PieceType::Pawn, &WHITE_PAWN_ATTACKS_MASKS),
-            Side::Black => self.get_capture_moves_for_pieces(PieceType::Pawn, &BLACK_PAWN_ATTACKS_MASKS),
-        };
         let quiet_moves = match self.game.side_to_move {
             Side::White => self.get_quiet_moves_for_pieces(PieceType::Pawn, &WHITE_PAWN_PUSHES_MASKS),
             Side::Black => self.get_quiet_moves_for_pieces(PieceType::Pawn, &BLACK_PAWN_PUSHES_MASKS),
         };
+
+        
         moves.extend(attack_moves);
         moves.extend(quiet_moves);
         moves
