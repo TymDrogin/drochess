@@ -15,7 +15,8 @@ const CAPTURE_FLAG_MASK: u16 =   0b0100;
 const SPECIAL1_FLAG_MASK: u16 =  0b0010;
 const SPECIAL2_FLAG_MASK: u16 =  0b0001;
 
-
+const INDEX_MASK: u16 = 0b111111;
+const FLAGS_MASK: u16 = 0b1111;
 
 
 #[derive(Debug, Clone, PartialEq)]
@@ -99,7 +100,7 @@ impl Move {
 #[derive(Debug)]
 pub enum MoveFlags {
     QuietMove =          0b0000, // 0
-    DoublePawnPush =     0b0001, // 1 -- Can be used to set en passant bits in gamestate
+    DoublePawnPush =     0b0001, // 1
     KingCastle =         0b0010, // 2
     QueenCastle =        0b0011, // 3    
     Capture =            0b0100, // 4 
