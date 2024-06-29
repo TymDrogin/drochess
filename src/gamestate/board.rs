@@ -1,7 +1,6 @@
 use rayon::prelude::*;
+use crate::gamestate::defs::*;
 
-pub const PIECE_TYPES_NUM: usize = 6;
-pub const BOARD_SIDE_LENGTH: u8 = 8;
 
 pub type Bitboard = u64;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

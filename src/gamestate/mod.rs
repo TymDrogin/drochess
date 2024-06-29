@@ -1,8 +1,14 @@
 pub mod board;
 pub mod castling_rights;
+pub mod history;
+pub mod defs;
+pub mod zobrist;
+
+
 use self::{
     board::{Board, Side, Square, PieceType, Bitboard},
     castling_rights::CastlingRights,
+    history::*,
 };
 
 // This constants are related to moves and their encoding
@@ -11,12 +17,18 @@ const MOVE_TO_OFFSET: u16 = 6;
 const MOVE_FLAGS_OFFSET: u16 = 12;
 
 const PROMOTION_FLAG_MASK: u16 = 0b1000;
+<<<<<<< HEAD
 const CAPTURE_FLAG_MASK: u16 =   0b0100;
 const SPECIAL1_FLAG_MASK: u16 =  0b0010;
 const SPECIAL2_FLAG_MASK: u16 =  0b0001;
 
 const INDEX_MASK: u16 = 0b111111;
 const FLAGS_MASK: u16 = 0b1111;
+=======
+const CAPTURE_FLAG_MASK:   u16 = 0b0100;
+const SPECIAL1_FLAG_MASK:  u16 = 0b0010;
+const SPECIAL2_FLAG_MASK:  u16 = 0b0001;
+>>>>>>> d68b890ab385ace255e6c28e5a198cef1124cb45
 
 
 #[derive(Debug, Clone, PartialEq)]
@@ -28,18 +40,8 @@ pub struct Gamestate {
     pub half_move_clock: u8,
     pub full_move_count: u8,
 
-    
+    pub zobrist_key: u64,
 }
-impl Gamestate {
-    pub fn apply_move(&mut self, mov: Move) {
-        todo!()
-    }
-    pub fn undo_move(&mut self, mov: Move) {
-        todo!()
-    }
-    
-}
-
 
 // Structure of the moves is 4 flag bits, 6 bits for the index of square to move, and 6 bits for index of square to move to
 // ****  ******  ****** - Total of 16 bits 
@@ -56,7 +58,7 @@ impl Move {
         )
     }
     #[inline(always)]
-    fn decode(&self) -> (MoveFlags, Square, Square) { // Flags, Square
+    fn decode(&self) -> (MoveFlags, Square, Square) { // Flags, From, To
         (self.get_flags(), self.get_from_square(), self.get_to_square())
     }
 
@@ -70,9 +72,8 @@ impl Move {
     }
     #[inline(always)]
     fn get_flags(&self) -> MoveFlags {
-        MoveFlags::from_u8(((self.0 >> MOVE_FLAGS_OFFSET) & 0b001111) as u8)
+        MoveFlags::from_u8(((self.0 >> MOVE_FLAGS_OFFSET) & 0b1111) as u8)
     }
-
     #[inline(always)]
     fn is_capture(&self) -> bool {
         let flags = self.get_flags() as u16;
