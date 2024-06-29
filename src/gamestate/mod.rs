@@ -1,14 +1,13 @@
 pub mod board;
 pub mod castling_rights;
+pub mod zobrist;
 pub mod history;
 pub mod defs;
-pub mod zobrist;
-
 
 use self::{
     board::{Board, Side, Square, PieceType, Bitboard},
     castling_rights::CastlingRights,
-    history::*,
+    zobrist::*,
 };
 
 // This constants are related to moves and their encoding
@@ -17,19 +16,12 @@ const MOVE_TO_OFFSET: u16 = 6;
 const MOVE_FLAGS_OFFSET: u16 = 12;
 
 const PROMOTION_FLAG_MASK: u16 = 0b1000;
-<<<<<<< HEAD
 const CAPTURE_FLAG_MASK: u16 =   0b0100;
 const SPECIAL1_FLAG_MASK: u16 =  0b0010;
 const SPECIAL2_FLAG_MASK: u16 =  0b0001;
 
 const INDEX_MASK: u16 = 0b111111;
-const FLAGS_MASK: u16 = 0b1111;
-=======
-const CAPTURE_FLAG_MASK:   u16 = 0b0100;
-const SPECIAL1_FLAG_MASK:  u16 = 0b0010;
-const SPECIAL2_FLAG_MASK:  u16 = 0b0001;
->>>>>>> d68b890ab385ace255e6c28e5a198cef1124cb45
-
+const FLAGS_MASK: u16 = 0b001111;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Gamestate {
@@ -41,12 +33,26 @@ pub struct Gamestate {
     pub full_move_count: u8,
 
     pub zobrist_key: u64,
+
+    
 }
+impl Gamestate {
+    pub fn new(board:Board, side_to_move: Side, castling_rights: CastlingRights, en_passant: u8, half_move_clock: u8, full_move_count:u8) -> Self {
+        todo!()
+    }
+    pub fn apply_move(&mut self, mov: Move) {
+        todo!()
+    }
+    pub fn undo_move(&mut self, mov: Move) {
+        todo!()
+    }
+    
+}
+
 
 // Structure of the moves is 4 flag bits, 6 bits for the index of square to move, and 6 bits for index of square to move to
 // ****  ******  ****** - Total of 16 bits 
 // flags toIndex fromIndex
-
 pub struct Move(u16);
 impl Move {
     #[inline(always)]
@@ -58,22 +64,23 @@ impl Move {
         )
     }
     #[inline(always)]
-    fn decode(&self) -> (MoveFlags, Square, Square) { // Flags, From, To
+    fn decode(&self) -> (MoveFlags, Square, Square) { // Flags, Square
         (self.get_flags(), self.get_from_square(), self.get_to_square())
     }
 
     #[inline(always)]
     fn get_from_square(&self) -> Square {
-        Square::new((self.0 & 0b111111) as u8)
+        Square::new((self.0 & INDEX_MASK) as u8)
     }
     #[inline(always)]
     fn get_to_square(&self) -> Square {
-        Square::new(((self.0 >> MOVE_TO_OFFSET) & 0b111111) as u8)
+        Square::new(((self.0 >> MOVE_TO_OFFSET) & INDEX_MASK) as u8)
     }
     #[inline(always)]
     fn get_flags(&self) -> MoveFlags {
-        MoveFlags::from_u8(((self.0 >> MOVE_FLAGS_OFFSET) & 0b1111) as u8)
+        MoveFlags::from_u8(((self.0 >> MOVE_FLAGS_OFFSET) & INDEX_MASK) as u8)
     }
+
     #[inline(always)]
     fn is_capture(&self) -> bool {
         let flags = self.get_flags() as u16;

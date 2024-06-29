@@ -13,7 +13,7 @@ pub enum PieceType {
     King,
 }
 impl PieceType {
-    pub fn new_from_usize(i: usize) -> Self {
+    pub fn from_u8(i: u8) -> Self {
         match i {
             0 => PieceType::Pawn,
             1 => PieceType::Knight,
@@ -49,10 +49,10 @@ impl Board {
 
         for i in 0..=PIECE_TYPES_NUM - 1 {
             if piece_mask & self.white_pieces[i] != 0 {
-                return Some((PieceType::new_from_usize(i), Side::White));
+                return Some((PieceType::from_u8(i as u8), Side::White));
             }
             if piece_mask & self.black_pieces[i] != 0 {
-                return Some((PieceType::new_from_usize(i), Side::Black));
+                return Some((PieceType::from_u8(i as u8), Side::Black));
             }
         }
         return None

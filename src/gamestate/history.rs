@@ -1,6 +1,3 @@
-use rayon::str::Lines;
-
-// This part is inspired by rustic chess engine
 use crate::gamestate::*;
 
 pub struct History {

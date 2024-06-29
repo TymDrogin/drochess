@@ -14,7 +14,7 @@ fn main() {
     print!("The move counter for pawns is {}", moves.len());
     println!();
     for mov in moves {
-        print!("{}", mov.to.to_algebraic_notation());
+        print!("{}", mov.);
         println!();
     }
 }
