@@ -38,7 +38,17 @@ pub struct Gamestate {
 }
 impl Gamestate {
     pub fn new(board:Board, side_to_move: Side, castling_rights: CastlingRights, en_passant: u8, half_move_clock: u8, full_move_count:u8) -> Self {
-        todo!()
+        let mut game = Gamestate {
+            board, 
+            side_to_move,
+            castling_rights,
+            en_passant,
+            half_move_clock,
+            full_move_count,
+            zobrist_key: 0,
+        };
+        game.zobrist_key = Zobrist::hash(&game);
+        game
     }
     pub fn apply_move(&mut self, mov: Move) {
         todo!()
