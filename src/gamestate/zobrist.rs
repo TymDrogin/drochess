@@ -1,22 +1,26 @@
 use crate::gamestate::*;
 use crate::gamestate::defs::*;
 use crate::gamestate::board::*;
-use rand::Rng;
+
+use rand::{Rng, SeedableRng};
+use rand::rngs::StdRng;
 use rayon::prelude::*;
 use lazy_static::lazy_static;
 
+
+const SEED: u64 = 1231231;
 lazy_static! {
     // The map looks like this - side of the piece - square on which piece is located - type of the piece, resulting in 768 random values for each possible combination
-    static ref PIECE_HASHES: [[[u64; PIECE_TYPES_NUM]; BOARD_NUM_OF_SQUARES]; SIDE_NUM] = generate_pieces_hashes();
-    static ref SIDE_HASHES: [u64; SIDE_NUM] = generate_side_hashes();
-    static ref CASTLING_HASHES: [u64; CASTLING_CONFIGURATIONS_NUM] = generate_castling_hashes();
-    static ref EN_PASSANT_HASHES: [u64; BOARD_SIDE_LENGTH] = generate_enpassant_hashes();
+    static ref PIECE_HASHES: [[[u64; PIECE_TYPES_NUM]; BOARD_NUM_OF_SQUARES]; SIDE_NUM] = generate_pieces_hashes(SEED);
+    static ref SIDE_HASHES: [u64; SIDE_NUM] = generate_side_hashes(SEED);
+    static ref CASTLING_HASHES: [u64; CASTLING_CONFIGURATIONS_NUM] = generate_castling_hashes(SEED);
+    static ref EN_PASSANT_HASHES: [u64; BOARD_SIDE_LENGTH] = generate_enpassant_hashes(SEED);
 }
 pub struct Zobrist;
 impl Zobrist {
     pub fn hash(game: &Gamestate) -> u64 {
         let mut zobrist_key:u64 = 0;
-        
+
         // Pieces
         let piece_hashes: u64 = (0..BOARD_NUM_OF_SQUARES)
             .into_par_iter()
@@ -54,8 +58,8 @@ impl Zobrist {
     }
 }
 
-fn generate_pieces_hashes() -> [[[u64; PIECE_TYPES_NUM]; BOARD_NUM_OF_SQUARES]; SIDE_NUM] {
-    let mut rng = rand::thread_rng();
+fn generate_pieces_hashes(seed: u64) -> [[[u64; PIECE_TYPES_NUM]; BOARD_NUM_OF_SQUARES]; SIDE_NUM] {
+    let mut rng = StdRng::seed_from_u64(seed);
     let mut array = [[[0; PIECE_TYPES_NUM]; BOARD_NUM_OF_SQUARES]; SIDE_NUM];
 
     let mut i = 0;
@@ -74,8 +78,8 @@ fn generate_pieces_hashes() -> [[[u64; PIECE_TYPES_NUM]; BOARD_NUM_OF_SQUARES]; 
     }
     array
 }
-fn generate_side_hashes() -> [u64; SIDE_NUM] {
-    let mut rng = rand::thread_rng();
+fn generate_side_hashes(seed: u64) -> [u64; SIDE_NUM] {
+    let mut rng = StdRng::seed_from_u64(seed);
     let mut array = [0u64; SIDE_NUM];
 
     let mut i = 0;
@@ -86,8 +90,8 @@ fn generate_side_hashes() -> [u64; SIDE_NUM] {
     }
     array
 }
-fn generate_castling_hashes() -> [u64; CASTLING_CONFIGURATIONS_NUM] {
-    let mut rng = rand::thread_rng();
+fn generate_castling_hashes(seed: u64) -> [u64; CASTLING_CONFIGURATIONS_NUM] {
+    let mut rng = StdRng::seed_from_u64(seed);
     let mut array = [0u64; CASTLING_CONFIGURATIONS_NUM];
 
     let mut i = 0;
@@ -98,8 +102,8 @@ fn generate_castling_hashes() -> [u64; CASTLING_CONFIGURATIONS_NUM] {
     }
     array
 }
-fn generate_enpassant_hashes() -> [u64; BOARD_SIDE_LENGTH] {
-    let mut rng = rand::thread_rng();
+fn generate_enpassant_hashes(seed: u64) -> [u64; BOARD_SIDE_LENGTH] {
+    let mut rng = StdRng::seed_from_u64(seed);
     let mut array = [0u64; BOARD_SIDE_LENGTH];
 
     let mut i = 0;
