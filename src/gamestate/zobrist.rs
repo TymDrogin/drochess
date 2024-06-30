@@ -16,6 +16,7 @@ lazy_static! {
     static ref CASTLING_HASHES: [u64; CASTLING_CONFIGURATIONS_NUM] = generate_castling_hashes(SEED);
     static ref EN_PASSANT_HASHES: [u64; BOARD_SIDE_LENGTH] = generate_enpassant_hashes(SEED);
 }
+
 pub struct Zobrist;
 impl Zobrist {
     pub fn hash(game: &Gamestate) -> u64 {
@@ -55,6 +56,20 @@ impl Zobrist {
         }
 
         zobrist_key // Return the Zobrist hash key
+    }
+
+    //Check this for more info https://www.chessprogramming.org/Incremental_Updates
+    pub fn icremental_hash_update(game: &Gamestate, mov: &Move) -> u64 {
+        let (from_square, to_square, piece, side) = (
+            mov.get_from_square(),
+            mov.get_to_square(),
+            game.board.get_piece_at_square(from),
+            game.side_to_move,
+        );
+
+        match mov.get_flags() {
+            
+        }
     }
 }
 
