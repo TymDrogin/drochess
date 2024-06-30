@@ -60,16 +60,7 @@ impl Zobrist {
 
     //Check this for more info https://www.chessprogramming.org/Incremental_Updates
     pub fn icremental_hash_update(game: &Gamestate, mov: &Move) -> u64 {
-        let (from_square, to_square, piece, side) = (
-            mov.get_from_square(),
-            mov.get_to_square(),
-            game.board.get_piece_at_square(from),
-            game.side_to_move,
-        );
-
-        match mov.get_flags() {
-            
-        }
+        todo!()
     }
 }
 
