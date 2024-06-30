@@ -6,6 +6,7 @@ use movegen::*; // Assuming movegen is in your current crate or correctly refere
 use movegen::defs::*;
 mod utils;
 use utils::fen::*;
+use utils::display::*;
 use gamestate::*;
 
 fn main() {
@@ -13,9 +14,11 @@ fn main() {
     let moves = MoveGen::new(&mut game).gererate();
     print!("The move counter for pawns is {}", moves.len());
     println!();
-    for mov in moves {
-        print!("{} {} {}", mov.decode().0 as usize, mov.decode().1.to_algebraic_notation(), mov.decode().2.to_algebraic_notation());
+    for mov in &moves {
+        print!("{}", mov);
         println!();
     }
+    print!("Game hash: {}", game.zobrist_key);
+    print!("{}", MoveDisplayWrapper(moves))
 }
 

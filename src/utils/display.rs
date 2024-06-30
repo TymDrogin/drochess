@@ -7,8 +7,10 @@ use crate::gamestate::{
     defs::*,
     Gamestate,
     Move,
+    MoveFlags
 };
 use std::fmt::{self, Display};
+use std::collections::HashMap;
 
 const PRINT_METADATA: bool = true;
 
@@ -101,6 +103,54 @@ impl Display for Gamestate {
 
 impl Display for Move {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        todo!()
+        write!(f, "Type: {0}, from {1} to {2}", self.decode().0, self.decode().1.to_algebraic_notation(), self.decode().2.to_algebraic_notation())?;
+
+        Ok(())
+    }
+}
+pub struct MoveDisplayWrapper(pub Vec<Move>);
+impl Display for MoveDisplayWrapper {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut grouped_moves: HashMap<String, Vec<&Move>> = HashMap::new();
+
+        writeln!(f)?;
+
+        for m in &self.0 {
+            grouped_moves
+                .entry(m.get_from_square().to_algebraic_notation())
+                .or_insert_with(Vec::new)
+                .push(m);
+        }
+
+        for (from, moves) in &grouped_moves {
+            writeln!(f, "From: {}", from)?;
+            for m in moves {
+                writeln!(f, "-To: {}, type: {}", m.get_to_square().to_algebraic_notation(), m.get_flags())?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl fmt::Display for MoveFlags {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = match *self {
+            MoveFlags::Quiet => "Quiet",
+            MoveFlags::DoublePawnPush => "Double Pawn Push",
+            MoveFlags::KingCastle => "King Castle",
+            MoveFlags::QueenCastle => "Queen Castle",
+            MoveFlags::Capture => "Capture",
+            MoveFlags::EpCapture => "En Passant Capture",
+            MoveFlags::KnightPromotion => "Knight Promotion",
+            MoveFlags::BishopPromotion => "Bishop Promotion",
+            MoveFlags::RookPromotion => "Rook Promotion",
+            MoveFlags::QueenPromotion => "Queen Promotion",
+            MoveFlags::KnightPromoCapture => "Knight Promotion Capture",
+            MoveFlags::BishopPromoCapture => "Bishop Promotion Capture",
+            MoveFlags::RookPromoCapture => "Rook Promotion Capture",
+            MoveFlags::QueenPromoCapture => "Queen Promotion Capture",
+        };
+        write!(f, "{}", s)
     }
 }
