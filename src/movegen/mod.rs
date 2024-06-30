@@ -48,7 +48,7 @@ impl<'a> MoveGen<'a> {
     pub fn gererate(&self) -> Vec<Move> {
         let mut moves = Vec::new();
         //moves.extend(self.generate_king_moves());
-        moves.extend(self.get_pawn_moves());
+        moves.extend(self.get_knight_moves());
         moves
     }
 
@@ -137,7 +137,7 @@ impl<'a> MoveGen<'a> {
             let quiet_moves_bitboard = attack_masks[from.get_index()] & !self.combined_occupancy;
             let quiet_moves_squares = Square::get_squares_from_bitboard(quiet_moves_bitboard);
             quiet_moves_squares.into_par_iter().map(move |quiet| 
-                Move::encode(from, quiet, MoveFlags::QuietMove)
+                Move::encode(from, quiet, MoveFlags::Quiet)
             )
         }).collect()
     }

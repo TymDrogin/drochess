@@ -2,6 +2,7 @@ use crate::gamestate::{
     board::*,
     castling_rights::{CastlingRights, CastlingSide},
     Gamestate,
+    defs::*,
 };
 use core::str;
 use thiserror::Error;
@@ -85,14 +86,7 @@ impl Fen {
         let half_move_clock = Self::get_half_move_clock(separated_fen[HALF_MOVE_CLOCK])?;
         let full_move_count = Self::get_full_move_count(separated_fen[FULL_MOVE_COUNTER])?;
 
-        return Ok(Gamestate {
-            board,
-            side_to_move,
-            castling_rights,
-            en_passant,
-            half_move_clock,
-            full_move_count,
-        });
+        return Ok(Gamestate::new(board, side_to_move, castling_rights, en_passant, half_move_clock, full_move_count))
     }
 
     fn get_board(s: &str) -> Result<Board, FenError> {
@@ -118,7 +112,7 @@ impl Fen {
                     file_index += empty_squares;
                     continue;
                 }
-                if file_index >= BOARD_SIDE_LENGTH {
+                if file_index >= BOARD_SIDE_LENGTH as u8 {
                     return Err(FenError::PieceLayout(format!("File index value is more than 8, file index = `{}`", file_index)));
                 }
     
@@ -148,7 +142,7 @@ impl Fen {
                 file_index += 1;
             }
     
-            if file_index != BOARD_SIDE_LENGTH {
+            if file_index != BOARD_SIDE_LENGTH as u8 {
                 return Err(FenError::PieceLayout(format!("By the end of the rank, file does not have exactly 8 squares, but {}", file_index)));
             }
         }
