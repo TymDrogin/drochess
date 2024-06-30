@@ -7,7 +7,8 @@ use crate::gamestate::{
     castling_rights::*,
     Gamestate,
     Move, 
-    MoveFlag
+    MoveFlags, 
+    defs::*,
 };
 use defs::*;
 use masks::*;
@@ -75,15 +76,7 @@ impl<'a> MoveGen<'a> {
     }
     fn get_pawn_moves(&self) -> Vec<Move> {
         let mut moves: Vec<Move> = Vec::new();
-        let quiet_moves = match self.game.side_to_move {
-            Side::White => self.get_quiet_moves_for_pieces(PieceType::Pawn, &WHITE_PAWN_PUSHES_MASKS),
-            Side::Black => self.get_quiet_moves_for_pieces(PieceType::Pawn, &BLACK_PAWN_PUSHES_MASKS),
-        };
-
-        
-        moves.extend(attack_moves);
-        moves.extend(quiet_moves);
-        moves
+        todo!()
     }
     fn get_castling_moves(&self) -> Vec<Move> {
         // Implement castling move generation logic here
@@ -99,7 +92,6 @@ impl<'a> MoveGen<'a> {
     #[inline(always)]
     fn get_basic_moves_for_pieces(&self, pieces_to_move: PieceType, attack_masks: &[Bitboard; 64]) -> Vec<Move> {
         let mut moves = Vec::new(); 
-        //moves.extend(self.get_capture_moves_for_pieces(pieces_to_move, attack_masks)); 
         moves.extend(self.get_capture_moves_for_pieces(pieces_to_move, attack_masks));
         moves.extend(self.get_quiet_moves_for_pieces(pieces_to_move, attack_masks));  
         
@@ -115,12 +107,11 @@ impl<'a> MoveGen<'a> {
                     let capture_moves_bitboard = (attack_masks[from.get_index()] & self.black_occupancy) & !self.white_occupancy;
                     let capture_moves_squares = Square::get_squares_from_bitboard(capture_moves_bitboard);
         
-                    capture_moves_squares.into_par_iter().map(move |capture| Move {
-                        from,
-                        to: capture,
-                        type_of: MoveType::Capture,
-                    })
-                }).collect()},
+                    capture_moves_squares.into_par_iter().map(move |capture| 
+                        Move::encode(from, capture, MoveFlags::Capture)
+                    )
+                }).collect()
+            },
             Side::Black => {        
                 let squares_with_pieces_to_move: Vec<Square> = Square::get_squares_from_bitboard(self.game.board.black_pieces[pieces_to_move as usize]);
 
@@ -128,12 +119,11 @@ impl<'a> MoveGen<'a> {
                     let capture_moves_bitboard = (attack_masks[from.get_index()] & self.white_occupancy) & !self.black_occupancy;
                     let capture_moves_squares = Square::get_squares_from_bitboard(capture_moves_bitboard);
         
-                    capture_moves_squares.into_par_iter().map(move |capture| Move {
-                        from,
-                        to: capture,
-                        type_of: MoveType::Capture,
-                    })
-                }).collect()},
+                    capture_moves_squares.into_par_iter().map(move |capture| 
+                        Move::encode(from, capture, MoveFlags::Capture)
+                    )
+                }).collect()
+            },
         }
     }
     #[inline(always)]
@@ -146,11 +136,9 @@ impl<'a> MoveGen<'a> {
         squares_with_pieces_to_move.par_iter().flat_map(|&from| {
             let quiet_moves_bitboard = attack_masks[from.get_index()] & !self.combined_occupancy;
             let quiet_moves_squares = Square::get_squares_from_bitboard(quiet_moves_bitboard);
-            quiet_moves_squares.into_par_iter().map(move |quiet| Move {
-                from,
-                to: quiet,
-                type_of: MoveType::Quiet,
-            })
+            quiet_moves_squares.into_par_iter().map(move |quiet| 
+                Move::encode(from, quiet, MoveFlags::QuietMove)
+            )
         }).collect()
     }
 }

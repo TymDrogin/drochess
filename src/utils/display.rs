@@ -4,6 +4,7 @@ use crate::gamestate::{
         CastlingRights,
         CastlingSide,
     },
+    defs::*,
     Gamestate,
     Move,
 };
@@ -37,8 +38,8 @@ impl Display for Gamestate {
                 // Depending on the current player to move it will "turn" the board
                 // using reversed indexing
                 match self.side_to_move {
-                    Side::White => {square = Square::new_from_file_rank(7 - file, 7 - rank).unwrap()},
-                    Side::Black => {square = Square::new_from_file_rank(file, rank).unwrap()},
+                    Side::White => {square = Square::new_from_file_rank(7 - file as u8, 7 - rank as u8).unwrap()},
+                    Side::Black => {square = Square::new_from_file_rank(file as u8, rank as u8).unwrap()},
                 }
 
                 let piece_char = match self.board.get_piece_at_square(square) {

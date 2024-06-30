@@ -66,7 +66,7 @@ impl Gamestate {
 pub struct Move(u16);
 impl Move {
     #[inline(always)]
-    fn encode(from: Square, to: Square, flags: MoveFlags) -> Move {
+    pub fn encode(from: Square, to: Square, flags: MoveFlags) -> Move {
         Self(
             (from.get_index() as u16) 
             | (to.get_index() as u16) << MOVE_TO_OFFSET
@@ -74,40 +74,40 @@ impl Move {
         )
     }
     #[inline(always)]
-    fn decode(&self) -> (MoveFlags, Square, Square) { // Flags, Square
+    pub fn decode(&self) -> (MoveFlags, Square, Square) { // Flags, Square
         (self.get_flags(), self.get_from_square(), self.get_to_square())
     }
 
     #[inline(always)]
-    fn get_from_square(&self) -> Square {
+    pub fn get_from_square(&self) -> Square {
         Square::new((self.0 & INDEX_MASK) as u8)
     }
     #[inline(always)]
-    fn get_to_square(&self) -> Square {
+    pub fn get_to_square(&self) -> Square {
         Square::new(((self.0 >> MOVE_TO_OFFSET) & INDEX_MASK) as u8)
     }
     #[inline(always)]
-    fn get_flags(&self) -> MoveFlags {
+    pub fn get_flags(&self) -> MoveFlags {
         MoveFlags::from_u8(((self.0 >> MOVE_FLAGS_OFFSET) & INDEX_MASK) as u8)
     }
 
     #[inline(always)]
-    fn is_capture(&self) -> bool {
+    pub fn is_capture(&self) -> bool {
         let flags = self.get_flags() as u16;
         (flags & CAPTURE_FLAG_MASK) != 0
     }
     #[inline(always)]
-    fn is_promotion(&self) -> bool {
+    pub fn is_promotion(&self) -> bool {
         let flags = self.get_flags() as u16;
         (flags & PROMOTION_FLAG_MASK) != 0
     }
     #[inline(always)]
-    fn is_promo_capture(&self) -> bool {
+    pub fn is_promo_capture(&self) -> bool {
         let flags = self.get_flags() as u16;
         (flags & PROMOTION_FLAG_MASK != 0) && (flags & CAPTURE_FLAG_MASK != 0)
     }
     #[inline(always)]
-    fn is_castle(&self) -> bool {
+    pub fn is_castle(&self) -> bool {
         let flags = self.get_flags() as u16;
         (flags & PROMOTION_FLAG_MASK == 0) && (flags & SPECIAL1_FLAG_MASK != 0)
     }
@@ -117,7 +117,7 @@ impl Move {
 
 #[derive(Debug)]
 pub enum MoveFlags {
-    QuietMove =          0b0000, // 0
+    Quiet =          0b0000, // 0
     DoublePawnPush =     0b0001, // 1
     KingCastle =         0b0010, // 2
     QueenCastle =        0b0011, // 3    
@@ -136,7 +136,7 @@ pub enum MoveFlags {
 impl MoveFlags {
     pub fn from_u8(value: u8) -> Self {
         match value {
-            0b0000 => MoveFlags::QuietMove,
+            0b0000 => MoveFlags::Quiet,
             0b0001 => MoveFlags::DoublePawnPush,
             0b0010 => MoveFlags::KingCastle,
             0b0011 => MoveFlags::QueenCastle,
