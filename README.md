@@ -5,7 +5,7 @@ So far not many things are implemented, howewer the journey is quite enjoyable.
 
 If you are intrested in contributing, please do it. The design of the engine is kept simple and logical.
 At the gamestate you will find most of the important structures, such as gamestate, board, castling rights, move defenition etc.
-Movegen folder has exactly what you whould expect, utils has some small files that soleves some important, but not really main problems.
+Movegen folder has exactly what you whould expect, utils has some small files that solves some important, but not really main problems.
 
 ## Features
 
