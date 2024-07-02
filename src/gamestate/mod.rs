@@ -88,7 +88,7 @@ impl Move {
     }
     #[inline(always)]
     pub fn get_flags(&self) -> MoveFlags {
-        MoveFlags::from_u8(((self.0 >> MOVE_FLAGS_OFFSET) & INDEX_MASK) as u8)
+        MoveFlags::from_u8(((self.0 >> MOVE_FLAGS_OFFSET) & FLAGS_MASK) as u8)
     }
 
     #[inline(always)]
