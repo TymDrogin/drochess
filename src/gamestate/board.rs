@@ -95,8 +95,6 @@ impl Square {
         assert!(index <= 63, "Attempted to create square with index more than max of 63");
         Self(index)
     }
-    // NOTE: Unlike in algebraic notation where files and ranks are from 1 to 8, 
-    // this function accepts values from 0 to 7, because it simplify using it in the loops
     #[inline(always)]
     pub const fn new_from_file_rank(file: u8, rank: u8) -> Option<Square> {
         if rank > 7 || file > 7 {
