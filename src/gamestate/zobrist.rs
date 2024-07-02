@@ -7,6 +7,7 @@ use rand::rngs::StdRng;
 use rayon::prelude::*;
 use lazy_static::lazy_static;
 
+// REFACTOR: Rewrite to use polyglot http://hgm.nubati.net/book_format.html
 
 const SEED: u64 = 1231231;
 lazy_static! {

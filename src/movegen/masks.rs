@@ -14,7 +14,30 @@ pub const WHITE_PAWN_PUSHES_MASKS: [Bitboard; 64] = generete_pawn_pushes_masks()
 pub const BLACK_PAWN_ATTACKS_MASKS: [Bitboard; 64] = generate_pawn_attacks_masks().1;
 pub const BLACK_PAWN_PUSHES_MASKS: [Bitboard; 64] = generete_pawn_pushes_masks().1;
 
-// Castling masks
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const fn generate_knight_attacks_masks() -> [Bitboard; 64] {
     let mut all_attacks: [Bitboard; 64] = [0; 64];

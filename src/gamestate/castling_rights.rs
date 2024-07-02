@@ -11,13 +11,13 @@ pub enum CastlingSide {
 }
 impl CastlingSide {
     #[inline(always)]
-    pub fn from_u8(u: u8) -> Option<CastlingSide> {
+    pub fn from_u8(u: u8) -> CastlingSide {
         match u {
-            0 => Some(CastlingSide::None),
-            1 => Some(CastlingSide::Kingside),
-            2 => Some(CastlingSide::Queenside),
-            3 => Some(CastlingSide::Both),
-            _ => None
+            0 => CastlingSide::None,
+            1 => CastlingSide::Kingside,
+            2 => CastlingSide::Queenside,
+            3 => CastlingSide::Both,
+            _ => unreachable!("Invalid castling side from u8 call")
         }
     }
 }
@@ -47,8 +47,8 @@ impl CastlingRights {
         const BLACK_MASK: u8 = 0b0000_11_00;
 
         match side {
-            Side::White => CastlingSide::from_u8(self.0 & WHITE_MASK).unwrap(),
-            Side::Black => CastlingSide::from_u8(self.0 & BLACK_MASK >> BLACK_SIDE_OFFSET).unwrap(),
+            Side::White => CastlingSide::from_u8(self.0 & WHITE_MASK),
+            Side::Black => CastlingSide::from_u8(self.0 & BLACK_MASK >> BLACK_SIDE_OFFSET),
         }
     }
     // If castling occures rules should be completely disabled for the side that castled

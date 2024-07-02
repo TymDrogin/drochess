@@ -140,7 +140,6 @@ impl Square {
     }
     #[inline(always)]
     pub const fn get_file_rank(&self) -> (u8, u8) {
-
         let rank: u8 = self.0 >> 3;
         let file: u8 = self.0 & 7;
 
