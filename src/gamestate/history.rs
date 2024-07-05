@@ -6,7 +6,7 @@ pub struct History {
 impl History {
     pub fn new() -> Self {
         Self {
-            list: Vec::new()
+            list: vec![]
         }
     }
     pub fn push(&mut self, game:Gamestate) {
@@ -18,5 +18,4 @@ impl History {
     pub fn get_last(&self) -> &Gamestate {
         &self.list[self.list.len() - 1]
     }
-
 }

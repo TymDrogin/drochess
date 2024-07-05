@@ -20,6 +20,7 @@ lazy_static! {
 
 pub struct Zobrist;
 impl Zobrist {
+    // Note that this function generetes always a new hash, incremental hash updates will be added soon
     pub fn hash(game: &Gamestate) -> u64 {
         let mut zobrist_key:u64 = 0;
 
@@ -27,13 +28,16 @@ impl Zobrist {
         let piece_hashes: u64 = (0..BOARD_NUM_OF_SQUARES)
             .into_par_iter()
             .filter_map(|i| {
-                let piece = game.board.get_piece_at_square(Square::new(i as u8));
-                piece.map(|x| match x.1 {
-                    Side::White => PIECE_HASHES[0][i][x.0 as usize],
-                    Side::Black => PIECE_HASHES[1][i][x.0 as usize],
-                })
+                // Get the piece at the given square
+                let square = Square::new(i as u8);
+                let piece = game.board.get_piece_at_square(square);
+                // Map the piece to its corresponding Zobrist hash
+                piece.map(|(piece_type, side)| 
+                    Self::piece_hash(side, square, piece_type)
+                )
             })
             .reduce(|| 0, |acc, x| acc ^ x);
+
         zobrist_key ^= piece_hashes;
 
         // Side to move
@@ -57,6 +61,14 @@ impl Zobrist {
         }
 
         zobrist_key // Return the Zobrist hash key
+    }
+
+
+    fn piece_hash(side: Side, square: Square, piece: PieceType) -> u64 {
+        match side {
+            Side::White => PIECE_HASHES[0][square.get_index()][piece as usize],
+            Side::Black => PIECE_HASHES[1][square.get_index()][piece as usize],
+        }
     }
 
     //Check this for more info https://www.chessprogramming.org/Incremental_Updates
