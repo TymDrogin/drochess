@@ -1,7 +1,11 @@
+use std::collections::BinaryHeap;
+
 use crate::{
     gamestate::board::*,
     movegen::defs::*,
 };
+
+use super::BOARD_NUM_OF_SQUARES;
 
 // Masks used for fast computation of all the attacks for a single piece at the time.
 // Get a mask by using square index
@@ -14,30 +18,8 @@ pub const WHITE_PAWN_PUSHES_MASKS: [Bitboard; 64] = generete_pawn_pushes_masks()
 pub const BLACK_PAWN_ATTACKS_MASKS: [Bitboard; 64] = generate_pawn_attacks_masks().1;
 pub const BLACK_PAWN_PUSHES_MASKS: [Bitboard; 64] = generete_pawn_pushes_masks().1;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+pub const ROOK_RAYS: [Bitboard; 64] = generate_rook_rays();
+pub const BISHOP_RAYS: [Bitboard; 64] = generate_bishop_rays();
 
 const fn generate_knight_attacks_masks() -> [Bitboard; 64] {
     let mut all_attacks: [Bitboard; 64] = [0; 64];
@@ -139,4 +121,62 @@ const fn generete_pawn_pushes_masks()  -> ([Bitboard; 64], [Bitboard; 64]) {
         i = i + 1;
     }
     (all_white_pushes, all_black_pushes)
+}
+
+const fn generate_rook_rays() -> [Bitboard; 64] {
+    let mut all_rays: [Bitboard; 64] = [0; 64];
+    let mut rank: usize;
+    let mut file: usize;
+
+    let mut i = 0;
+    while i < BOARD_NUM_OF_SQUARES {
+        let position_mask: Bitboard= 1 << i;
+        let (file, rank) = Square::new(i as u8).get_file_rank();
+
+        let mut north_ray: Bitboard = 0;
+        let mut south_ray: Bitboard = 0;
+        let mut east_ray: Bitboard = 0;
+        let mut west_ray: Bitboard = 0;
+
+        // UP RAY
+        let mut j = rank;
+        while j < 6 {
+            north_ray |= position_mask << (NORTH * (7 - j) as i32);
+            north_ray &= !position_mask;
+            j += 1;
+        }
+
+        // DOWN RAY
+        let mut j = rank;
+        while j > 1 {
+            south_ray |= position_mask >> (-SOUTH * (7 - j) as i32);
+            south_ray &= !position_mask;
+            j -= 1;
+        }
+
+        // LEFT RAY
+        let mut j = file;
+        while j < 6 {
+            east_ray |= position_mask << (EAST * (7 - j) as i32);
+            east_ray &= !position_mask;
+            j += 1;
+        }
+
+        // RIGHT RAY
+        let mut j = file;
+        while j > 1 {
+            west_ray |= position_mask >> (-WEST * (7 - j) as i32);
+            west_ray &= !position_mask;
+            j -= 1; 
+        }
+
+        all_rays[i] = north_ray | south_ray | east_ray | west_ray;
+        i += 1;
+    }
+
+    all_rays
+}
+const fn generate_bishop_rays() -> [Bitboard; 64] {
+    let mut all_rays: [Bitboard; 64] = [0; 64];
+    all_rays
 }
