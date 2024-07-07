@@ -4,6 +4,8 @@ pub mod zobrist;
 pub mod history;
 pub mod defs;
 
+use rayon::iter::FlatMap;
+
 use self::{
     board::{Board, Side, Square, PieceType, Bitboard},
     castling_rights::CastlingRights,
@@ -16,9 +18,11 @@ const MOVE_TO_OFFSET: u16 = 6;
 const MOVE_FLAGS_OFFSET: u16 = 12;
 
 const PROMOTION_FLAG_MASK: u16 = 0b1000;
-const CAPTURE_FLAG_MASK: u16 =   0b0100;
-const SPECIAL1_FLAG_MASK: u16 =  0b0010;
-const SPECIAL2_FLAG_MASK: u16 =  0b0001;
+const CAPTURE_FLAG_MASK:   u16 = 0b0100;
+const SPECIAL1_FLAG_MASK:  u16 = 0b0010;
+const SPECIAL2_FLAG_MASK:  u16 = 0b0001;
+
+const PROMO_CAPTURE_FLAGS_MASK: u16 = PROMOTION_FLAG_MASK | CAPTURE_FLAG_MASK;
 
 const INDEX_MASK: u16 = 0b111111;
 const FLAGS_MASK: u16 = 0b001111;
@@ -50,7 +54,20 @@ impl Gamestate {
         game.zobrist_key = Zobrist::hash(&game);
         game
     }
-    pub fn apply_move(&mut self, mov: Move) {
+    pub fn make_move(&self, mov: &Move) -> Gamestate {
+        let new_zobrist_key = Zobrist::icremental_hash_update(self, mov);
+        let new_side_to_move = match self.side_to_move {
+            Side::White => Side::Black,
+            Side::Black => Side::White,
+        };
+
+
+
+
+        todo!()
+
+    }
+    fn make_move_with_zobrist(&self, mov: &Move, new_zobrist_key: u64) -> Gamestate {
         todo!()
     }
     pub fn undo_move(&mut self, mov: Move) {
@@ -104,12 +121,20 @@ impl Move {
     #[inline(always)]
     pub fn is_promo_capture(&self) -> bool {
         let flags = self.get_flags() as u16;
-        (flags & PROMOTION_FLAG_MASK != 0) && (flags & CAPTURE_FLAG_MASK != 0)
+        (flags & PROMO_CAPTURE_FLAGS_MASK) == PROMO_CAPTURE_FLAGS_MASK
     }
     #[inline(always)]
     pub fn is_castle(&self) -> bool {
-        let flags = self.get_flags() as u16;
-        (flags & PROMOTION_FLAG_MASK == 0) && (flags & SPECIAL1_FLAG_MASK != 0)
+        match self.get_flags() {
+            MoveFlags::KingCastle | MoveFlags::QueenCastle => true,
+            _ => false,
+        }
+    }
+    pub fn is_ep_capture(&self) -> bool{
+        match self.get_flags() {
+            MoveFlags::EpCapture => true,
+            _ => false,
+        }
     }
 
 }
@@ -117,17 +142,25 @@ impl Move {
 
 #[derive(Debug)]
 pub enum MoveFlags {
-    Quiet =          0b0000, // 0
+    // QUIET
+    Quiet =              0b0000, // 0
     DoublePawnPush =     0b0001, // 1
+
+    // CASTLE
     KingCastle =         0b0010, // 2
-    QueenCastle =        0b0011, // 3    
+    QueenCastle =        0b0011, // 3 
+
+    // CAPTURE
     Capture =            0b0100, // 4 
     EpCapture =          0b0101, // 5
-    // All promotions
+
+    // QUIET PROMOTIONS
     KnightPromotion =    0b1000, // 8
     BishopPromotion =    0b1001, // 9
     RookPromotion =      0b1010, // 10
     QueenPromotion =     0b1011, // 11
+
+    // CAPTURE PROMOTIONS
     KnightPromoCapture = 0b1100, // 12
     BishopPromoCapture = 0b1101, // 13
     RookPromoCapture =   0b1110, // 14
@@ -152,5 +185,14 @@ impl MoveFlags {
             0b1111 => MoveFlags::QueenPromoCapture,
             _ => unreachable!("Invalid move flag: {:#b}", value),
         }
+    }
+    pub fn get_promotion_piece(&self) -> Option<PieceType> {
+        match &self {
+            MoveFlags::QueenPromotion  | MoveFlags::QueenPromoCapture  => return Some(PieceType::Queen),
+            MoveFlags::KnightPromotion | MoveFlags::KnightPromoCapture => return Some(PieceType::Knight),
+            MoveFlags::BishopPromotion | MoveFlags::BishopPromoCapture => return Some(PieceType::Bishop),
+            MoveFlags::RookPromotion   | MoveFlags::RookPromoCapture   => return Some(PieceType::Rook),
+            _ => return None
+        };
     }
 }

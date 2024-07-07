@@ -95,7 +95,7 @@ impl Fen {
             return Err(FenError::PieceLayout(format!("The number of board ranks is not equal to 8, ranks number = `{}`", fen_ranks.len())));
         }
     
-        let mut board = Board::new();
+        let mut board = Board::default();
         for (rank_index, rank) in fen_ranks.iter().enumerate() {
             if rank_index >= BOARD_SIDE_LENGTH as usize {
                 return Err(FenError::PieceLayout(format!("Rank index value is more than 8, rank index = `{}`", rank_index)));

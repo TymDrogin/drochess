@@ -37,13 +37,15 @@ pub struct Board {
     pub white_pieces: [Bitboard; PIECE_TYPES_NUM],
     pub black_pieces: [Bitboard; PIECE_TYPES_NUM],
 }
-impl Board {
-    pub fn new() -> Self {
+impl Default for Board {
+    fn default() -> Self {
         Self {
             white_pieces: [0; PIECE_TYPES_NUM],
             black_pieces: [0; PIECE_TYPES_NUM],
         }
     }
+}
+impl Board {
     pub fn get_piece_at_square(&self, square: Square) -> Option<(PieceType, Side)> {
         let piece_mask = square.get_mask();
 
@@ -87,7 +89,6 @@ impl Board {
     }
     
 }
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Square(u8);
 impl Square {

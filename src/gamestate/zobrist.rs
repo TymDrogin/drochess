@@ -17,6 +17,8 @@ lazy_static! {
     static ref CASTLING_HASHES: [u64; CASTLING_CONFIGURATIONS_NUM] = generate_castling_hashes(SEED);
     static ref EN_PASSANT_HASHES: [u64; BOARD_SIDE_LENGTH] = generate_enpassant_hashes(SEED);
 }
+const WHITE_SIDE: usize = 0;
+const BLACK_SIDE: usize = 1;
 
 pub struct Zobrist;
 impl Zobrist {
@@ -59,10 +61,97 @@ impl Zobrist {
         zobrist_key // Return the Zobrist hash key
     }
 
+    // Used to update piece part of the hash. It can be very usefull during search, since to access transopsiional table entry we need zobrist,
+    // And because they are not random from position to position we can get only the hash to see if there is any data in table instead of computing full
+    // make move
     //Check this for more info https://www.chessprogramming.org/Incremental_Updates
+    // This function should be used BEFORE applying the move to the gamestate
     pub fn icremental_hash_update(game: &Gamestate, mov: &Move) -> u64 {
-        todo!()
+        let mut new_zobrist_key = game.zobrist_key;
+
+        // Re-hash side
+        Self::update_side_part_of_hash(&mut new_zobrist_key, game.side_to_move);
+
+        let square_from = mov.get_from_square();
+        let piece_moved = game.board.get_piece_at_square(square_from).unwrap().0;
+        let square_to = mov.get_to_square();
+        let piece_captured = game.board.get_piece_at_square(square_to);
+        let promoted_to = mov.get_flags().get_promotion_piece();
+
+        match mov.get_flags() {
+            MoveFlags::Quiet => {
+                Self::update_piece_being_moved_part_of_hash(
+                    &mut new_zobrist_key, 
+                    piece_moved,
+                    game.side_to_move,
+                    square_from,
+                    square_to
+                );
+                // CHECK FOR ROOK AND KING CASTLING RIGHTS
+            },
+            MoveFlags::DoublePawnPush => {
+                Self::update_piece_being_moved_part_of_hash(
+                    &mut new_zobrist_key, 
+                    piece_moved,
+                    game.side_to_move,
+                    square_from,
+                    square_to
+                );
+                return new_zobrist_key;  
+            },
+
+            
+
+
+
+
+
+
+            _ => todo!()
+        }
+
+
+
+
+
+
+
+
+        new_zobrist_key
     }
+
+    
+    fn update_piece_being_moved_part_of_hash(zobrist_key: &mut u64, piece: PieceType, side: Side, square_from: Square, square_to: Square) {
+        *zobrist_key ^= PIECE_HASHES[side as usize][square_from.get_index()][piece as usize];
+        *zobrist_key ^= PIECE_HASHES[side as usize][square_to.get_index()][piece as usize];
+    }
+    fn update_side_part_of_hash(zobrist_key: &mut u64, side_to_move: Side) {
+        match side_to_move {
+            Side::White => {
+                // Undo white side hash
+                *zobrist_key ^= SIDE_HASHES[WHITE_SIDE];
+                // Set black side hash
+                *zobrist_key ^= SIDE_HASHES[BLACK_SIDE];
+            },
+            Side::Black => {
+                // Undo black side hash
+                *zobrist_key ^= SIDE_HASHES[BLACK_SIDE];
+                // Set white side hash
+                *zobrist_key ^= SIDE_HASHES[WHITE_SIDE];
+            },
+        }
+    }
+    fn update_captured_piece_part_of_hash(zobrist_key: &mut u64, side: Side, square_to: Square, captured_piece: PieceType) {
+        match side {
+            Side::White => {
+                *zobrist_key ^= PIECE_HASHES[BLACK_SIDE][square_to.get_index()][captured_piece as usize];
+            },
+            Side::Black => {
+                *zobrist_key ^= PIECE_HASHES[WHITE_SIDE][square_to.get_index()][captured_piece as usize];
+            }, 
+        }
+    }
+    fn update_
 }
 
 fn generate_pieces_hashes(seed: u64) -> [[[u64; PIECE_TYPES_NUM]; BOARD_NUM_OF_SQUARES]; SIDE_NUM] {
