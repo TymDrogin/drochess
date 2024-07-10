@@ -82,122 +82,121 @@ impl Zobrist {
     // This function should be used BEFORE applying the move to the gamestate
     pub fn icremental_hash_update(game: &Gamestate, mov: &Move) -> u64 {
 
-        let side = game.side_to_move;
+        let side_to_move = game.side_to_move;
         let square_from = mov.get_from_square();
         let square_to = mov.get_to_square();
         let piece_moved = game.board.get_piece_at_square(square_from).unwrap().0;
-        let piece_captured = game.board.get_piece_at_square(square_to);
-
+        
         let mut new_zobrist_key = game.zobrist_key;
 
         // Side part of hash
-        Self::update_side_hash(&mut new_zobrist_key, side);
+        update_side_hash(&mut new_zobrist_key, side_to_move);
+        match mov.get_flags() {
+            MoveFlags::Quiet | MoveFlags::DoublePawnPush => {
+                update_piece_moved_hash(&mut new_zobrist_key, piece_moved, square_from, square_to, side_to_move);
+                return new_zobrist_key
+            },
+            MoveFlags::Capture => {
+                // Clear old positon and set new piece hash
+                update_piece_moved_hash(&mut new_zobrist_key, piece_moved, square_from, square_to, side_to_move);
 
-        if mov.get_flags() == MoveFlags::Quiet {
-
-        }
-
-        if mov.is_castle() {
-            match mov.get_flags() {
-                MoveFlags::KingCastle => {
-                    Self::update_castling_rights_disable_full_side_hash(&mut new_zobrist_key, side, game.castling_rights);
-
-                }
-                MoveFlags::QueenCastle =>  {
-                    Self::update_castling_rights_disable_full_side_hash(&mut new_zobrist_key, side, game.castling_rights);
-                }
-                _ => unreachable!("Invalid move flags for castling"),
+                // Clear captured piece hash
+                let captured_piece: PieceType = game.board.get_piece_at_square(square_to).unwrap().0;
+                update_captured_piece_hash(&mut new_zobrist_key, side_to_move, square_to, captured_piece);
+                return new_zobrist_key
+            },
+            MoveFlags::EpCapture => {
+                todo!()
             }
-            // Rehash pieces
-            match side {
-                Side::White => {
+            MoveFlags::KingCastle => {
+                todo!();
+            },
+            MoveFlags::QueenCastle => {
+                todo!();
+            },
+            // Quiet promotions
+            MoveFlags::QueenPromotion | MoveFlags::KnightPromotion | MoveFlags::BishopPromotion | MoveFlags::RookPromotion => {
+                // Clear old piece position hash 
+                new_zobrist_key ^= PIECE_HASHES[side_to_move as usize][square_from.get_index()][piece_moved as usize];
 
-                },
-                Side::Black => {
-
-                }
-            }
-            return new_zobrist_key;
-        }
-
-        if mov.is_ep_capture() {
-
-        }
-
-        // If move is promotion handle and return
-        if mov.is_promotion() {
-            // Clear old piece position hash 
-            new_zobrist_key ^= PIECE_HASHES[side as usize][square_from.get_index()][piece_moved as usize];
-
-            // Handle promocature
-            if mov.is_capture() {
-                Self::update_captured_piece_hash(&mut new_zobrist_key, side, square_to, piece_captured.unwrap().0);
-            }
-            // Set promoted piece hash
-            new_zobrist_key ^= PIECE_HASHES[side as usize][square_to.get_index()][mov.get_flags().get_promotion_piece().unwrap() as usize];
+                // Set promoted piece hash
+                new_zobrist_key ^= PIECE_HASHES[side_to_move as usize][square_to.get_index()][mov.get_flags().get_promotion_piece().unwrap() as usize];
                 
-            return new_zobrist_key;
-        }        
-
-        
-        panic!("None of the zobrist incremental hash condition has been satisfiyed")
-    }
-
-    
-    fn update_piece_moved_hash(zobrist_key: &mut u64, piece: PieceType, square_from: Square, square_to: Square, side: Side) {
-        *zobrist_key ^= PIECE_HASHES[side as usize][square_from.get_index()][piece as usize];
-        *zobrist_key ^= PIECE_HASHES[side as usize][square_to.get_index()][piece as usize];
-    }
-    fn update_side_hash(zobrist_key: &mut u64, side_to_move: Side) {
-        match side_to_move {
-            Side::White => {
-                // Undo white side hash
-                *zobrist_key ^= SIDE_HASHES[WHITE_SIDE];
-                // Set black side hash
-                *zobrist_key ^= SIDE_HASHES[BLACK_SIDE];
+                return new_zobrist_key;
             },
-            Side::Black => {
-                // Undo black side hash
-                *zobrist_key ^= SIDE_HASHES[BLACK_SIDE];
-                // Set white side hash
-                *zobrist_key ^= SIDE_HASHES[WHITE_SIDE];
+            // Capture promotions 
+            MoveFlags::QueenPromoCapture | MoveFlags::KnightPromoCapture | MoveFlags::BishopPromoCapture | MoveFlags::RookPromoCapture => {
+                // Clear old piece position hash 
+                new_zobrist_key ^= PIECE_HASHES[side_to_move as usize][square_from.get_index()][piece_moved as usize];
+
+                // Clear captured piece positon hash
+                let captured_piece = game.board.get_piece_at_square(square_to).unwrap().0;
+                update_captured_piece_hash(&mut new_zobrist_key, side_to_move, square_to, captured_piece);
+
+                // Set promoted piece hash
+                new_zobrist_key ^= PIECE_HASHES[side_to_move as usize][square_to.get_index()][mov.get_flags().get_promotion_piece().unwrap() as usize];
+                
+                return new_zobrist_key;
             },
         }
-    }
-    fn update_captured_piece_hash(zobrist_key: &mut u64, side: Side, square_to: Square, captured_piece: PieceType) {
-        match side {
-            Side::White => {
-                *zobrist_key ^= PIECE_HASHES[BLACK_SIDE][square_to.get_index()][captured_piece as usize];
-            },
-            Side::Black => {
-                *zobrist_key ^= PIECE_HASHES[WHITE_SIDE][square_to.get_index()][captured_piece as usize];
-            }, 
-        }
-    }
-    // In case of the move (such as quiet and attack) by the king should disable rights 
-    fn update_castling_rights_disable_full_side_hash(zobrist_key: &mut u64, side: Side, castling_rights: CastlingRights) {
-        // Clear old castling
-        *zobrist_key ^= CASTLING_HASHES[castling_rights.get() as usize];
-
-        // Get new rights
-        let mut new_rights = castling_rights;
-        new_rights.disable_full_side(side);
-
-        // Set new rights
-        *zobrist_key ^= CASTLING_HASHES[new_rights.get() as usize];
-    }
-    fn update_castling_rights_disable_part_of_side_for_side_to_move_hash(zobrist_key: &mut u64, side: Side, castling_rights: CastlingRights, side_to_disable: CastlingSide) {
-      // Clear old castling
-      *zobrist_key ^= CASTLING_HASHES[castling_rights.get() as usize];
-
-      // Get new rights
-      let mut new_rights = castling_rights;
-      new_rights.disable_part_of_side(side, side_to_disable);
-
-      // Set new rights
-      *zobrist_key ^= CASTLING_HASHES[new_rights.get() as usize];
     }
 }
+fn update_piece_moved_hash(zobrist_key: &mut u64, piece: PieceType, square_from: Square, square_to: Square, side: Side) {
+    // Clear old positon
+    *zobrist_key ^= PIECE_HASHES[side as usize][square_from.get_index()][piece as usize];
+    // Set new position
+    *zobrist_key ^= PIECE_HASHES[side as usize][square_to.get_index()][piece as usize];
+}
+fn update_side_hash(zobrist_key: &mut u64, side_to_move: Side) {
+    match side_to_move {
+        Side::White => {
+            // Undo white side hash
+            *zobrist_key ^= SIDE_HASHES[WHITE_SIDE];
+            // Set black side hash
+            *zobrist_key ^= SIDE_HASHES[BLACK_SIDE];
+        },
+        Side::Black => {
+            // Undo black side hash
+            *zobrist_key ^= SIDE_HASHES[BLACK_SIDE];
+            // Set white side hash
+            *zobrist_key ^= SIDE_HASHES[WHITE_SIDE];
+        },
+    }
+}
+fn update_captured_piece_hash(zobrist_key: &mut u64, side_to_move: Side, positon: Square, captured_piece: PieceType) {
+    match side_to_move {
+        Side::White => {
+            *zobrist_key ^= PIECE_HASHES[BLACK_SIDE][positon.get_index()][captured_piece as usize];
+        },
+        Side::Black => {
+            *zobrist_key ^= PIECE_HASHES[WHITE_SIDE][positon.get_index()][captured_piece as usize];
+        }, 
+    }
+}
+fn update_castling_rights_disable_full_side_hash(zobrist_key: &mut u64, side: Side, castling_rights: CastlingRights) {
+    // Clear old castling
+    *zobrist_key ^= CASTLING_HASHES[castling_rights.get() as usize];
+
+    // Get new rights
+    let mut new_rights = castling_rights.clone();
+    new_rights.disable_full_side(side);
+
+    // Set new rights
+    *zobrist_key ^= CASTLING_HASHES[new_rights.get() as usize];
+}
+fn update_castling_rights_disable_part_of_side_for_side_to_move_hash(zobrist_key: &mut u64, side: Side, castling_rights: CastlingRights, side_to_disable: CastlingSide) {
+  // Clear old castling
+  *zobrist_key ^= CASTLING_HASHES[castling_rights.get() as usize];
+
+  // Get new rights
+  let mut new_rights = castling_rights;
+  new_rights.disable_part_of_side(side, side_to_disable);
+
+  // Set new rights
+  *zobrist_key ^= CASTLING_HASHES[new_rights.get() as usize];
+}
+
+
 
 fn generate_pieces_hashes(seed: u64) -> [[[u64; PIECE_TYPES_NUM]; BOARD_NUM_OF_SQUARES]; SIDE_NUM] {
     let mut rng = StdRng::seed_from_u64(seed);
