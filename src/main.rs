@@ -38,10 +38,6 @@ fn main() {
     print!("Game hash: {}", game.zobrist_key);
     print!("{}", MoveDisplayWrapper(moves));
 
-    for ray in ROOK_RAYS {
-        print_bitboard(ray);
-        println!()
-    }
 
 }
 

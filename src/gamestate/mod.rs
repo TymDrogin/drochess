@@ -140,7 +140,7 @@ impl Move {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum MoveFlags {
     // QUIET
     Quiet =              0b0000, // 0
@@ -170,11 +170,15 @@ impl MoveFlags {
     pub fn from_u8(value: u8) -> Self {
         match value {
             0b0000 => MoveFlags::Quiet,
+
             0b0001 => MoveFlags::DoublePawnPush,
+
             0b0010 => MoveFlags::KingCastle,
             0b0011 => MoveFlags::QueenCastle,
+
             0b0100 => MoveFlags::Capture,
             0b0101 => MoveFlags::EpCapture,
+
             0b1000 => MoveFlags::KnightPromotion,
             0b1001 => MoveFlags::BishopPromotion,
             0b1010 => MoveFlags::RookPromotion,
