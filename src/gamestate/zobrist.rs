@@ -86,7 +86,7 @@ impl Zobrist {
 
     // Check this for more info https://www.chessprogramming.org/Incremental_Updates
     // This function should be used BEFORE applying the move to the gamestate
-    pub fn icremental_hash_update(game: &Gamestate, mov: &Move) -> u64 {
+    pub fn incremental_hash_update(game: &Gamestate, mov: &Move) -> u64 {
         let side_to_move = game.side_to_move;
         let square_from = mov.get_from_square();
         let square_to = mov.get_to_square();
