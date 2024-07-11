@@ -23,12 +23,29 @@ lazy_static! {
 const WHITE_SIDE: usize = 0;
 const BLACK_SIDE: usize = 1;
 
-const WHITE_KINGSIDE_ROOK_INDEX: usize = 0;
-const WHITE_QUEENSIDE_ROOK_INDES: usize = 0;
-const BLACK_KINGSIDE_ROOK_INDEX: usize = 0;
-const BLACK_QUEENSIDE_ROOK_INDES: usize = 0;
-const WHITE_KING_STARTING_INDEX: usize = 0;
-const BLACK_KING_STARTING_INDEX: usize = 0;
+// Castling initial positions
+const WHITE_KING_STARTING_INDEX: u8 = 4;
+const BLACK_KING_STARTING_INDEX: u8 = 60;
+// -- kingside
+const WHITE_ROOK_KINGSIDE_STATING_INDEX: u8 = 7;
+const BLACK_ROOK_KINGSIDE_STATING_INDEX: u8 = 63;
+// --queenside
+const WHITE_ROOK_QUEENSIDE_STARTING_INDEX: u8 = 0;
+const BLACK_ROOK_QUEENSIDE_STARTING_INDEX: u8 = 56;
+
+// Castling end positions
+// -- kings kingside
+const WHITE_KING_KINGSIDE_END_INDEX: u8 = 6;
+const BLACK_KING_KINGSIDE_END_INDEX: u8 = 62; 
+// -- kings queenside
+const WHITE_KING_QUEENSIDE_END_INDEX: u8 = 2;
+const BLACK_KING_QUEENSIDE_END_INDEX: u8 = 58; 
+// -- rooks kingside 
+const WHITE_ROOK_KINGSIDE_END_INDEX: u8 = 5;
+const BLACK_ROOK_KINGSIDE_END_INDEX: u8 = 61;
+// -- rooks queenside 
+const WHITE_ROOK_QUEENSIDE_END_INDEX: u8 = 3;
+const BLACK_ROOK_QUEENSIDE_END_INDEX: u8 = 59;
 
 
 
@@ -81,15 +98,12 @@ impl Zobrist {
     // Check this for more info https://www.chessprogramming.org/Incremental_Updates
     // This function should be used BEFORE applying the move to the gamestate
     pub fn icremental_hash_update(game: &Gamestate, mov: &Move) -> u64 {
-
         let side_to_move = game.side_to_move;
         let square_from = mov.get_from_square();
         let square_to = mov.get_to_square();
         let piece_moved = game.board.get_piece_at_square(square_from).unwrap().0;
         
         let mut new_zobrist_key = game.zobrist_key;
-
-        // Side part of hash
         update_side_hash(&mut new_zobrist_key, side_to_move);
         match mov.get_flags() {
             MoveFlags::Quiet | MoveFlags::DoublePawnPush => {
@@ -109,10 +123,15 @@ impl Zobrist {
                 todo!()
             }
             MoveFlags::KingCastle => {
-                todo!();
+                // Castling moves do not have encoded positions in move, everything set to zero
+                update_kingside_castling_pieces_hash(&mut new_zobrist_key, side_to_move);
+                update_castling_rights_disable_full_side_hash(&mut new_zobrist_key, side_to_move, game.castling_rights.clone());
+                return new_zobrist_key;
             },
             MoveFlags::QueenCastle => {
-                todo!();
+                update_queenside_castling_pieces_hash(&mut new_zobrist_key, side_to_move);
+                update_castling_rights_disable_full_side_hash(&mut new_zobrist_key, side_to_move, game.castling_rights.clone());
+                return new_zobrist_key;
             },
             // Quiet promotions
             MoveFlags::QueenPromotion | MoveFlags::KnightPromotion | MoveFlags::BishopPromotion | MoveFlags::RookPromotion => {
@@ -141,6 +160,8 @@ impl Zobrist {
         }
     }
 }
+
+// This functions are a helper functions, each of them makes something with the zobrist key. Maybe it is an overkill, i have no idea.  
 fn update_piece_moved_hash(zobrist_key: &mut u64, piece: PieceType, square_from: Square, square_to: Square, side: Side) {
     // Clear old positon
     *zobrist_key ^= PIECE_HASHES[side as usize][square_from.get_index()][piece as usize];
@@ -173,12 +194,68 @@ fn update_captured_piece_hash(zobrist_key: &mut u64, side_to_move: Side, positon
         }, 
     }
 }
+fn update_kingside_castling_pieces_hash(zobrist_key: &mut u64, side_to_move: Side) {
+    match side_to_move {
+        Side::White => {
+            // Rehash king position
+            update_piece_moved_hash(zobrist_key, PieceType::King, 
+                Square::new(WHITE_KING_STARTING_INDEX), 
+                Square::new(WHITE_KING_KINGSIDE_END_INDEX),
+                Side::White);
+            // Rehash rook position
+            update_piece_moved_hash(zobrist_key, PieceType::Rook,
+                Square::new(WHITE_ROOK_KINGSIDE_STATING_INDEX), 
+                Square::new(WHITE_ROOK_KINGSIDE_END_INDEX), 
+                Side::White);
+        }
+        Side::Black => {
+            // Rehash king position
+            update_piece_moved_hash(zobrist_key, PieceType::King, 
+                Square::new(BLACK_KING_STARTING_INDEX), 
+                Square::new(BLACK_KING_KINGSIDE_END_INDEX),
+                Side::Black);
+            // Rehash rook position
+            update_piece_moved_hash(zobrist_key, PieceType::Rook, 
+                Square::new(BLACK_ROOK_KINGSIDE_STATING_INDEX), 
+                Square::new(BLACK_ROOK_KINGSIDE_END_INDEX),
+                Side::White);
+        }
+    }
+}
+fn update_queenside_castling_pieces_hash(zobrist_key: &mut u64, side_to_move: Side) { 
+    match side_to_move {
+        Side::White => {
+            // Rehash king position
+            update_piece_moved_hash(zobrist_key, PieceType::King, 
+                Square::new(WHITE_KING_STARTING_INDEX), 
+                Square::new(WHITE_KING_QUEENSIDE_END_INDEX),
+                Side::White);
+            // Rehash rook position
+            update_piece_moved_hash(zobrist_key, PieceType::Rook,
+                Square::new(WHITE_ROOK_QUEENSIDE_STARTING_INDEX), 
+                Square::new(WHITE_ROOK_QUEENSIDE_END_INDEX), 
+                Side::White);
+        }
+        Side::Black => {
+            // Rehash king position
+            update_piece_moved_hash(zobrist_key, PieceType::King, 
+                Square::new(BLACK_KING_STARTING_INDEX), 
+                Square::new(BLACK_KING_QUEENSIDE_END_INDEX),
+                Side::Black);
+            // Rehash rook position
+            update_piece_moved_hash(zobrist_key, PieceType::Rook, 
+                Square::new(BLACK_ROOK_QUEENSIDE_STARTING_INDEX), 
+                Square::new(BLACK_ROOK_QUEENSIDE_END_INDEX),
+                Side::White);
+        }
+    }
+}
 fn update_castling_rights_disable_full_side_hash(zobrist_key: &mut u64, side: Side, castling_rights: CastlingRights) {
     // Clear old castling
     *zobrist_key ^= CASTLING_HASHES[castling_rights.get() as usize];
 
     // Get new rights
-    let mut new_rights = castling_rights.clone();
+    let mut new_rights = castling_rights;
     new_rights.disable_full_side(side);
 
     // Set new rights
@@ -197,7 +274,7 @@ fn update_castling_rights_disable_part_of_side_for_side_to_move_hash(zobrist_key
 }
 
 
-
+// This function used to generete static arrays of random values
 fn generate_pieces_hashes(seed: u64) -> [[[u64; PIECE_TYPES_NUM]; BOARD_NUM_OF_SQUARES]; SIDE_NUM] {
     let mut rng = StdRng::seed_from_u64(seed);
     let mut array = [[[0; PIECE_TYPES_NUM]; BOARD_NUM_OF_SQUARES]; SIDE_NUM];
