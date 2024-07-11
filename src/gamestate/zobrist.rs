@@ -1,5 +1,3 @@
-use std::arch::x86_64::_MM_FLUSH_ZERO_ON;
-
 use crate::gamestate::*;
 use crate::gamestate::defs::*;
 use crate::gamestate::board::*;
@@ -10,8 +8,6 @@ use rand::rngs::StdRng;
 use rayon::prelude::*;
 use lazy_static::lazy_static;
 
-// REFACTOR: Rewrite to use polyglot http://hgm.nubati.net/book_format.html
-
 const SEED: u64 = 1231231;
 lazy_static! {
     // The map looks like this - side of the piece - square on which piece is located - type of the piece, resulting in 768 random values for each possible combination
@@ -20,9 +16,10 @@ lazy_static! {
     static ref CASTLING_HASHES: [u64; CASTLING_CONFIGURATIONS_NUM] = generate_castling_hashes(SEED);
     static ref EN_PASSANT_HASHES: [u64; BOARD_SIDE_LENGTH] = generate_enpassant_hashes(SEED);
 }
+
+
 const WHITE_SIDE: usize = 0;
 const BLACK_SIDE: usize = 1;
-
 // Castling initial positions
 const WHITE_KING_STARTING_INDEX: u8 = 4;
 const BLACK_KING_STARTING_INDEX: u8 = 60;
@@ -47,15 +44,11 @@ const BLACK_ROOK_KINGSIDE_END_INDEX: u8 = 61;
 const WHITE_ROOK_QUEENSIDE_END_INDEX: u8 = 3;
 const BLACK_ROOK_QUEENSIDE_END_INDEX: u8 = 59;
 
-
-
-
 pub struct Zobrist;
 impl Zobrist {
     // Note that this function generetes always a new hash, incremental hash updates will be added soon
     pub fn hash(game: &Gamestate) -> u64 {
         let mut zobrist_key:u64 = 0;
-
         // Pieces
         let piece_hashes: u64 = (0..BOARD_NUM_OF_SQUARES)
             .into_par_iter()
@@ -71,7 +64,6 @@ impl Zobrist {
             .reduce(|| 0, |acc, x| acc ^ x);
 
         zobrist_key ^= piece_hashes;
-
         // Side to move
         match game.side_to_move {
             Side::White => {
@@ -81,23 +73,20 @@ impl Zobrist {
                 zobrist_key ^= SIDE_HASHES[1];
             },
         }
-
         // Castling rights
         zobrist_key ^= CASTLING_HASHES[game.castling_rights.get() as usize];
-
         // En passant
         for i in 0..BOARD_SIDE_LENGTH {
             if ((1 << i) & game.en_passant as usize) != 0 {
                 zobrist_key ^= EN_PASSANT_HASHES[i];
             }
         }
-
         zobrist_key // Return the Zobrist hash key
     }
 
     // Check this for more info https://www.chessprogramming.org/Incremental_Updates
     // This function should be used BEFORE applying the move to the gamestate
-    pub fn icremental_hash_update(game: &Gamestate, mov: &Move) -> u64 {
+    pub fn incremental_hash_update(game: &Gamestate, mov: &Move) -> u64 {
         let side_to_move = game.side_to_move;
         let square_from = mov.get_from_square();
         let square_to = mov.get_to_square();
@@ -108,36 +97,36 @@ impl Zobrist {
         match mov.get_flags() {
             MoveFlags::Quiet | MoveFlags::DoublePawnPush => {
                 update_piece_moved_hash(&mut new_zobrist_key, piece_moved, square_from, square_to, side_to_move);
+                
                 return new_zobrist_key
             },
             MoveFlags::Capture => {
-                // Clear old positon and set new piece hash
                 update_piece_moved_hash(&mut new_zobrist_key, piece_moved, square_from, square_to, side_to_move);
-
-                // Clear captured piece hash
+                
                 let captured_piece: PieceType = game.board.get_piece_at_square(square_to).unwrap().0;
                 update_captured_piece_hash(&mut new_zobrist_key, side_to_move, square_to, captured_piece);
+                
                 return new_zobrist_key
             },
             MoveFlags::EpCapture => {
                 todo!()
             }
             MoveFlags::KingCastle => {
-                // Castling moves do not have encoded positions in move, everything set to zero
                 update_kingside_castling_pieces_hash(&mut new_zobrist_key, side_to_move);
                 update_castling_rights_disable_full_side_hash(&mut new_zobrist_key, side_to_move, game.castling_rights.clone());
+                
                 return new_zobrist_key;
             },
             MoveFlags::QueenCastle => {
                 update_queenside_castling_pieces_hash(&mut new_zobrist_key, side_to_move);
                 update_castling_rights_disable_full_side_hash(&mut new_zobrist_key, side_to_move, game.castling_rights.clone());
+                
                 return new_zobrist_key;
             },
             // Quiet promotions
             MoveFlags::QueenPromotion | MoveFlags::KnightPromotion | MoveFlags::BishopPromotion | MoveFlags::RookPromotion => {
                 // Clear old piece position hash 
                 new_zobrist_key ^= PIECE_HASHES[side_to_move as usize][square_from.get_index()][piece_moved as usize];
-
                 // Set promoted piece hash
                 new_zobrist_key ^= PIECE_HASHES[side_to_move as usize][square_to.get_index()][mov.get_flags().get_promotion_piece().unwrap() as usize];
                 
@@ -147,11 +136,9 @@ impl Zobrist {
             MoveFlags::QueenPromoCapture | MoveFlags::KnightPromoCapture | MoveFlags::BishopPromoCapture | MoveFlags::RookPromoCapture => {
                 // Clear old piece position hash 
                 new_zobrist_key ^= PIECE_HASHES[side_to_move as usize][square_from.get_index()][piece_moved as usize];
-
                 // Clear captured piece positon hash
                 let captured_piece = game.board.get_piece_at_square(square_to).unwrap().0;
                 update_captured_piece_hash(&mut new_zobrist_key, side_to_move, square_to, captured_piece);
-
                 // Set promoted piece hash
                 new_zobrist_key ^= PIECE_HASHES[side_to_move as usize][square_to.get_index()][mov.get_flags().get_promotion_piece().unwrap() as usize];
                 
@@ -161,7 +148,7 @@ impl Zobrist {
     }
 }
 
-// This functions are a helper functions, each of them makes something with the zobrist key. Maybe it is an overkill, i have no idea.  
+// This functions are a helpers, each of them makes something with the zobrist key. Maybe it is an overkill, i have no idea.  
 fn update_piece_moved_hash(zobrist_key: &mut u64, piece: PieceType, square_from: Square, square_to: Square, side: Side) {
     // Clear old positon
     *zobrist_key ^= PIECE_HASHES[side as usize][square_from.get_index()][piece as usize];
@@ -253,28 +240,23 @@ fn update_queenside_castling_pieces_hash(zobrist_key: &mut u64, side_to_move: Si
 fn update_castling_rights_disable_full_side_hash(zobrist_key: &mut u64, side: Side, castling_rights: CastlingRights) {
     // Clear old castling
     *zobrist_key ^= CASTLING_HASHES[castling_rights.get() as usize];
-
     // Get new rights
     let mut new_rights = castling_rights;
     new_rights.disable_full_side(side);
-
     // Set new rights
     *zobrist_key ^= CASTLING_HASHES[new_rights.get() as usize];
 }
 fn update_castling_rights_disable_part_of_side_for_side_to_move_hash(zobrist_key: &mut u64, side: Side, castling_rights: CastlingRights, side_to_disable: CastlingSide) {
   // Clear old castling
   *zobrist_key ^= CASTLING_HASHES[castling_rights.get() as usize];
-
   // Get new rights
   let mut new_rights = castling_rights;
   new_rights.disable_part_of_side(side, side_to_disable);
-
-  // Set new rights
+  // Hash new rights
   *zobrist_key ^= CASTLING_HASHES[new_rights.get() as usize];
 }
 
-
-// This function used to generete static arrays of random values
+// This functiond are used to generete static arrays of random values
 fn generate_pieces_hashes(seed: u64) -> [[[u64; PIECE_TYPES_NUM]; BOARD_NUM_OF_SQUARES]; SIDE_NUM] {
     let mut rng = StdRng::seed_from_u64(seed);
     let mut array = [[[0; PIECE_TYPES_NUM]; BOARD_NUM_OF_SQUARES]; SIDE_NUM];
