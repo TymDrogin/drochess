@@ -38,7 +38,7 @@ pub const NOT_H_FILE: Bitboard = !H_FILE;
 pub const NOT_AB_FILE: Bitboard = NOT_A_FILE & NOT_B_FILE;
 pub const NOT_GH_FILE: Bitboard = NOT_G_FILE & NOT_H_FILE;
 
-// Ckeckout https://www.chessprogramming.org/Knight_Pattern for idea what they are for
+// Check out https://www.chessprogramming.org/Knight_Pattern for idea what they are for
 pub const NO_NO_EA: i32 = 17;  // North-North-East
 pub const NO_EA_EA: i32 = 10;  // North-East-East
 pub const SO_EA_EA: i32 = -6;  // South-East-East
