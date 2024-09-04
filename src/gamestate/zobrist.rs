@@ -97,31 +97,24 @@ impl Zobrist {
         match mov.get_flags() {
             MoveFlags::Quiet | MoveFlags::DoublePawnPush => {
                 update_piece_moved_hash(&mut new_zobrist_key, piece_moved, square_from, square_to, side_to_move);
-                
-                return new_zobrist_key
             },
             MoveFlags::Capture => {
                 update_piece_moved_hash(&mut new_zobrist_key, piece_moved, square_from, square_to, side_to_move);
                 
                 let captured_piece: PieceType = game.board.get_piece_at_square(square_to).unwrap().0;
                 update_captured_piece_hash(&mut new_zobrist_key, side_to_move, square_to, captured_piece);
-                
-                return new_zobrist_key
             },
             MoveFlags::EpCapture => {
                 todo!()
             }
+            // Catling moves
             MoveFlags::KingCastle => {
                 update_kingside_castling_pieces_hash(&mut new_zobrist_key, side_to_move);
                 update_castling_rights_disable_full_side_hash(&mut new_zobrist_key, side_to_move, game.castling_rights.clone());
-                
-                return new_zobrist_key;
             },
             MoveFlags::QueenCastle => {
                 update_queenside_castling_pieces_hash(&mut new_zobrist_key, side_to_move);
                 update_castling_rights_disable_full_side_hash(&mut new_zobrist_key, side_to_move, game.castling_rights.clone());
-                
-                return new_zobrist_key;
             },
             // Quiet promotions
             MoveFlags::QueenPromotion | MoveFlags::KnightPromotion | MoveFlags::BishopPromotion | MoveFlags::RookPromotion => {
@@ -129,8 +122,6 @@ impl Zobrist {
                 new_zobrist_key ^= PIECE_HASHES[side_to_move as usize][square_from.get_index()][piece_moved as usize];
                 // Set promoted piece hash
                 new_zobrist_key ^= PIECE_HASHES[side_to_move as usize][square_to.get_index()][mov.get_flags().get_promotion_piece().unwrap() as usize];
-                
-                return new_zobrist_key;
             },
             // Capture promotions 
             MoveFlags::QueenPromoCapture | MoveFlags::KnightPromoCapture | MoveFlags::BishopPromoCapture | MoveFlags::RookPromoCapture => {
@@ -141,10 +132,10 @@ impl Zobrist {
                 update_captured_piece_hash(&mut new_zobrist_key, side_to_move, square_to, captured_piece);
                 // Set promoted piece hash
                 new_zobrist_key ^= PIECE_HASHES[side_to_move as usize][square_to.get_index()][mov.get_flags().get_promotion_piece().unwrap() as usize];
-                
-                return new_zobrist_key;
             },
         }
+
+        return new_zobrist_key
     }
 }
 

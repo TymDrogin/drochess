@@ -130,53 +130,17 @@ const fn generate_rook_rays() -> [Bitboard; 64] {
 
     let mut i = 0;
     while i < BOARD_NUM_OF_SQUARES {
-        let position_mask: Bitboard= 1 << i;
-        let (file, rank) = Square::new(i as u8).get_file_rank();
 
-        let mut north_ray: Bitboard = 0;
-        let mut south_ray: Bitboard = 0;
-        let mut east_ray: Bitboard = 0;
-        let mut west_ray: Bitboard = 0;
-
-        // UP RAY
-        let mut j = rank;
-        while j < 6 {
-            north_ray |= position_mask << (NORTH * (7 - j) as i32);
-            north_ray &= !position_mask;
-            j += 1;
-        }
-
-        // DOWN RAY
-        let mut j = rank;
-        while j > 1 {
-            south_ray |= position_mask >> (-SOUTH * (7 - j) as i32);
-            south_ray &= !position_mask;
-            j -= 1;
-        }
-
-        // LEFT RAY
-        let mut j = file;
-        while j < 6 {
-            east_ray |= position_mask << (EAST * (7 - j) as i32);
-            east_ray &= !position_mask;
-            j += 1;
-        }
-
-        // RIGHT RAY
-        let mut j = file;
-        while j > 1 {
-            west_ray |= position_mask >> (-WEST * (7 - j) as i32);
-            west_ray &= !position_mask;
-            j -= 1; 
-        }
-
-        all_rays[i] = north_ray | south_ray | east_ray | west_ray;
-        i += 1;
     }
 
     all_rays
 }
 const fn generate_bishop_rays() -> [Bitboard; 64] {
     let mut all_rays: [Bitboard; 64] = [0; 64];
-    all_rays
+
+    let mut i = 0;
+    while i < BOARD_NUM_OF_SQUARES {
+
+    }
+
 }

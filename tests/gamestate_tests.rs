@@ -62,7 +62,7 @@ mod tests {
 
     #[test]
     fn test_board_place_piece_at_square() {
-        let mut board = Board::new();
+        let mut board = Board::default();
 
         let square = Square::new_from_file_rank(3, 4).unwrap();
         board.place_piece_at_square(square, PieceType::Knight, Side::White);
@@ -81,7 +81,7 @@ mod tests {
 
     #[test]
     fn test_board_remove_piece_at_square() {
-        let mut board = Board::new();
+        let mut board = Board::default();
 
         // Place a white knight on the board at (3, 4)
         let square_knight = Square::new_from_file_rank(3, 4).unwrap();
@@ -116,7 +116,7 @@ mod tests {
 
     #[test]
     fn test_board_clear_square() {
-        let mut board = Board::new();
+        let mut board = Board::default();
 
         // Place a white knight on the board at (3, 4)
         let square_knight = Square::new_from_file_rank(3, 4).unwrap();
