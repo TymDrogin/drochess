@@ -3,7 +3,7 @@
 Drochess is a chess engine I am working on in my free time.
 The engine is fully implemented in rust, and aims to be simple in design and fast.
 I am trying use most of the conventional tecnics for developing an engine while 
-Maintaining the clarity of the design and using as many nice developer features rust has to offer.
+maintaining the clarity of the design and using as many nice developer features rust has to offer as possible.
 
 If you are intrested in contributing, please do it.
 Every module does exaclty what you whould expect it to do, and some features that has no defined category are located in utils.
