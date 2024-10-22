@@ -139,7 +139,7 @@ impl Zobrist {
     }
 }
 
-// This functions are a helpers, each of them makes something with the zobrist key. Maybe it is an overkill, i have no idea.  
+// This functions are  helpers, each of them makes something with the zobrist key. Maybe it is an overkill, i have no idea.  
 fn update_piece_moved_hash(zobrist_key: &mut u64, piece: PieceType, square_from: Square, square_to: Square, side: Side) {
     // Clear old positon
     *zobrist_key ^= PIECE_HASHES[side as usize][square_from.get_index()][piece as usize];

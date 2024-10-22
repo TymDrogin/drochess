@@ -177,6 +177,8 @@ impl Square {
     pub fn get_mask(&self) -> Bitboard {
         ((1 as u64) << (self.0 as u64)) as Bitboard
     }
+
+    
     #[inline(always)]
     pub fn get_squares_from_bitboard(bitboard: Bitboard) -> Vec<Square> {
         (0..64)

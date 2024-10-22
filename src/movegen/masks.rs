@@ -1,11 +1,10 @@
-use std::collections::BinaryHeap;
+
 
 use crate::{
     gamestate::board::*,
     movegen::defs::*,
 };
 
-use super::BOARD_NUM_OF_SQUARES;
 
 // Masks used for fast computation of all the attacks for a single piece at the time.
 // Get a mask by using square index
@@ -18,8 +17,8 @@ pub const WHITE_PAWN_PUSHES_MASKS: [Bitboard; 64] = generete_pawn_pushes_masks()
 pub const BLACK_PAWN_ATTACKS_MASKS: [Bitboard; 64] = generate_pawn_attacks_masks().1;
 pub const BLACK_PAWN_PUSHES_MASKS: [Bitboard; 64] = generete_pawn_pushes_masks().1;
 
-pub const ROOK_RAYS: [Bitboard; 64] = generate_rook_rays();
-pub const BISHOP_RAYS: [Bitboard; 64] = generate_bishop_rays();
+//pub const ROOK_RAYS: [Bitboard; 64] = generate_rook_rays();
+//pub const BISHOP_RAYS: [Bitboard; 64] = generate_bishop_rays();
 
 const fn generate_knight_attacks_masks() -> [Bitboard; 64] {
     let mut all_attacks: [Bitboard; 64] = [0; 64];
@@ -123,24 +122,4 @@ const fn generete_pawn_pushes_masks()  -> ([Bitboard; 64], [Bitboard; 64]) {
     (all_white_pushes, all_black_pushes)
 }
 
-const fn generate_rook_rays() -> [Bitboard; 64] {
-    let mut all_rays: [Bitboard; 64] = [0; 64];
-    let mut rank: usize;
-    let mut file: usize;
 
-    let mut i = 0;
-    while i < BOARD_NUM_OF_SQUARES {
-
-    }
-
-    all_rays
-}
-const fn generate_bishop_rays() -> [Bitboard; 64] {
-    let mut all_rays: [Bitboard; 64] = [0; 64];
-
-    let mut i = 0;
-    while i < BOARD_NUM_OF_SQUARES {
-
-    }
-
-}

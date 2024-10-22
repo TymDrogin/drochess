@@ -5,8 +5,8 @@ mod utils;
 
 mod engine;
 
+use board::Side;
 use board::Square;
-use masks::ROOK_RAYS;
 use movegen::*; // Assuming movegen is in your current crate or correctly referenced
 use movegen::defs::*;
 

@@ -55,7 +55,7 @@ impl Gamestate {
         game
     }
     pub fn make_move(&self, mov: &Move) -> Gamestate {
-        let new_zobrist_key = Zobrist::icremental_hash_update(self, mov);
+        let new_zobrist_key = Zobrist::incremental_hash_update(self, mov);
         let new_side_to_move = match self.side_to_move {
             Side::White => Side::Black,
             Side::Black => Side::White,

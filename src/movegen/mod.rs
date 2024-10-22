@@ -48,7 +48,7 @@ impl<'a> MoveGen<'a> {
     pub fn gererate(&self) -> Vec<Move> {
         let mut moves = Vec::new();
         //moves.extend(self.generate_king_moves());
-        moves.extend(self.get_knight_moves());
+        moves.extend(self.get_pawn_moves());
         moves
     }
 
@@ -76,7 +76,18 @@ impl<'a> MoveGen<'a> {
     }
     fn get_pawn_moves(&self) -> Vec<Move> {
         let mut moves: Vec<Move> = Vec::new();
-        todo!()
+        match self.game.side_to_move {
+            Side::White => {
+                moves.extend(self.get_capture_moves_for_pieces(PieceType::Pawn, &WHITE_PAWN_ATTACKS_MASKS));
+                moves.extend(self.get_quiet_moves_for_pieces(PieceType::Pawn, &WHITE_PAWN_PUSHES_MASKS));
+            },
+            Side::Black => {
+                moves.extend(self.get_capture_moves_for_pieces(PieceType::Pawn, &BLACK_PAWN_ATTACKS_MASKS));
+                moves.extend(self.get_quiet_moves_for_pieces(PieceType::Pawn, &BLACK_PAWN_PUSHES_MASKS));
+            },
+            
+        }
+        return moves;
     }
     fn get_castling_moves(&self) -> Vec<Move> {
         // Implement castling move generation logic here
