@@ -12,10 +12,13 @@ pub const KING_ATTAKS_MASKS:[Bitboard; 64] = generate_king_attacks_masks();
 pub const KNIGHT_ATTACKS_MASKS:[Bitboard; 64] = generate_knight_attacks_masks();
 
 pub const WHITE_PAWN_ATTACKS_MASKS: [Bitboard; 64] = generate_pawn_attacks_masks().0;
-pub const WHITE_PAWN_PUSHES_MASKS: [Bitboard; 64] = generete_pawn_pushes_masks().0;
+pub const WHITE_PAWN_PUSHES_MASKS: [Bitboard; 64] = generate_pawn_pushes_masks().0;
 
 pub const BLACK_PAWN_ATTACKS_MASKS: [Bitboard; 64] = generate_pawn_attacks_masks().1;
-pub const BLACK_PAWN_PUSHES_MASKS: [Bitboard; 64] = generete_pawn_pushes_masks().1;
+pub const BLACK_PAWN_PUSHES_MASKS: [Bitboard; 64] = generate_pawn_pushes_masks().1;
+pub const ROOK_RAYS: [Bitboard; 64] = generate_rook_rays();
+pub const BISHOP_RAYS: [Bitboard; 64] = generate_bishop_rays();
+
 
 //pub const ROOK_RAYS: [Bitboard; 64] = generate_rook_rays();
 //pub const BISHOP_RAYS: [Bitboard; 64] = generate_bishop_rays();
@@ -26,7 +29,7 @@ const fn generate_knight_attacks_masks() -> [Bitboard; 64] {
     let mut i: usize = 0;
     while i < 63 {
         let mut attacks_mask: Bitboard = 0;
-        let position_mask = 1 << i;
+        let position_mask = Square::new(i as u8).get_mask();
 
         // Right side clockwise
         attacks_mask |= (position_mask << NO_NO_EA) & NOT_A_FILE;
@@ -52,7 +55,7 @@ const fn generate_king_attacks_masks() -> [Bitboard; 64] {
     while i < 64 {
         let mut attacks_mask: Bitboard = 0;
 
-        let position_mask = ((1 as u64) << i) as Bitboard;
+        let position_mask = Square::new(i as u8).get_mask();
 
         attacks_mask |=  position_mask << NORTH;
         attacks_mask |= (position_mask << NORTHEAST) & NOT_A_FILE;
@@ -79,7 +82,7 @@ const fn generate_pawn_attacks_masks() -> ([Bitboard; 64], [Bitboard; 64]) {
         let mut white_attacks_mask: Bitboard = 0;
         let mut black_attacks_mask: Bitboard = 0;
 
-        let position_mask = ((1 as u64) << i) as Bitboard;
+        let position_mask = Square::new(i as u8).get_mask();
 
         white_attacks_mask |= (position_mask << NORTHEAST) & NOT_A_FILE;
         white_attacks_mask |= (position_mask << NORTHWEST) & NOT_H_FILE;
@@ -93,7 +96,7 @@ const fn generate_pawn_attacks_masks() -> ([Bitboard; 64], [Bitboard; 64]) {
     }
     (all_white_attacks, all_black_attacks)
 }
-const fn generete_pawn_pushes_masks()  -> ([Bitboard; 64], [Bitboard; 64]) {
+const fn generate_pawn_pushes_masks()  -> ([Bitboard; 64], [Bitboard; 64]) {
     let mut all_white_pushes: [Bitboard; 64] = [0; 64];
     let mut all_black_pushes: [Bitboard; 64] = [0; 64];
 
@@ -102,7 +105,7 @@ const fn generete_pawn_pushes_masks()  -> ([Bitboard; 64], [Bitboard; 64]) {
         let mut white_pushes_mask: Bitboard = 0;
         let mut black_pushes_mask: Bitboard = 0;
 
-        let position_mask = ((1 as u64) << i) as Bitboard;
+        let position_mask = Square::new(i as u8).get_mask();
         let rank = Square::new(i as u8).get_file_rank().1;
 
         white_pushes_mask |= position_mask << NORTH;
@@ -122,4 +125,87 @@ const fn generete_pawn_pushes_masks()  -> ([Bitboard; 64], [Bitboard; 64]) {
     (all_white_pushes, all_black_pushes)
 }
 
+const fn generate_rook_rays() -> [Bitboard; 64] {
+    let mut all_rays: [Bitboard; 64] = [0; 64];
+
+    let mut i: usize = 0;
+    while i < 64 {
+        let mut rays_mask: Bitboard = 0;
+        let position_mask = Square::new(i as u8).get_mask();
+
+        // North
+        let mut pos = i as i32;
+        while pos + NORTH < 64 {
+            pos += NORTH;
+            rays_mask |= 1 << pos;
+        }
+
+        // South
+        pos = i as i32;
+        while pos + SOUTH >= 0 {
+            pos += SOUTH;
+            rays_mask |= 1 << pos;
+        }
+
+        // East
+        pos = i as i32;
+        while pos % 8 != 7 {
+            pos += EAST;
+            rays_mask |= 1 << pos;
+        }
+
+        // West
+        pos = i as i32;
+        while pos % 8 != 0 {
+            pos += WEST;
+            rays_mask |= 1 << pos;
+        }
+
+        all_rays[i] = rays_mask;
+        i += 1;
+    }
+
+    all_rays
+}
+const fn generate_bishop_rays() -> [Bitboard; 64] {
+    let mut all_rays: [Bitboard; 64] = [0; 64];
+
+    let mut i: usize = 0;
+    while i < 64 {
+        let mut rays_mask: Bitboard = 0;
+
+        // North-East
+        let mut pos = i as i32;
+        while pos + NORTHEAST < 64 && pos % 8 != 7 {
+            pos += NORTHEAST;
+            rays_mask |= 1 << pos;
+        }
+
+        // North-West
+        pos = i as i32;
+        while pos + NORTHWEST < 64 && pos % 8 != 0 {
+            pos += NORTHWEST;
+            rays_mask |= 1 << pos;
+        }
+
+        // South-East
+        pos = i as i32;
+        while pos + SOUTHEAST >= 0 && pos % 8 != 7 {
+            pos += SOUTHEAST;
+            rays_mask |= 1 << pos;
+        }
+
+        // South-West
+        pos = i as i32;
+        while pos + SOUTHWEST >= 0 && pos % 8 != 0 {
+            pos += SOUTHWEST;
+            rays_mask |= 1 << pos;
+        }
+
+        all_rays[i] = rays_mask;
+        i += 1;
+    }
+
+    all_rays
+}
 

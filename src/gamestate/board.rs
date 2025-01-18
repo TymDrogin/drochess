@@ -174,7 +174,7 @@ impl Square {
         format!("{}{}", file_char, rank_char)
     }
     #[inline(always)]
-    pub fn get_mask(&self) -> Bitboard {
+    pub const fn get_mask(&self) -> Bitboard {
         ((1 as u64) << (self.0 as u64)) as Bitboard
     }
 

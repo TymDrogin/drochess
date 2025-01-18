@@ -7,6 +7,8 @@ mod engine;
 
 use board::Side;
 use board::Square;
+use masks::BISHOP_RAYS;
+use masks::ROOK_RAYS;
 use movegen::*; // Assuming movegen is in your current crate or correctly referenced
 use movegen::defs::*;
 
@@ -33,6 +35,10 @@ fn main() {
     println!();
     for mov in &moves {
         print!("{}", mov);
+        println!();
+    }
+    for i in 0..64 {
+        print_bitboard(BISHOP_RAYS[i]);
         println!();
     }
     print!("Game hash: {}", game.zobrist_key);
