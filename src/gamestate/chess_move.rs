@@ -45,37 +45,48 @@ impl Move {
         MoveFlags::from_u8(((self.0 >> FLAGS_OFFSET) & FLAGS_MASK) as u8)
     }
 
-
     #[inline(always)]
-    fn get_flags_raw(&self) -> u8 {
+    fn get_flags_as_u8(&self) -> u8 {
         ((self.0 >> FLAGS_OFFSET) & FLAGS_MASK) as u8
     }
 
+    
+    #[inline(always)]
+    pub fn is_quiet(&self) -> bool {
+        let flags = self.get_flags_as_u8();
+        flags == MoveFlags::Quiet as u8
+    }
+
+    #[inline(always)]
+    pub fn is_castle(&self) -> bool {
+        let flags = self.get_flags_as_u8();
+        (flags == MoveFlags::KingCastle as u8) || (flags == MoveFlags::QueenCastle as u8)
+    }
+
+
     #[inline(always)]
     pub fn is_capture(&self) -> bool {
-        let flags = self.get_flags_raw();
+        let flags = self.get_flags_as_u8();
         (flags & CAPTURE_FLAG_MASK) != 0
     }
+        #[inline(always)]
+    pub fn is_ep_capture(&self) -> bool{
+        let flags = self.get_flags_as_u8();
+        flags == MoveFlags::EpCapture as u8
+    }
+
+
     #[inline(always)]
     pub fn is_promotion(&self) -> bool {
-        let flags = self.get_flags_raw();
+        let flags = self.get_flags_as_u8();
         (flags & PROMOTION_FLAG_MASK) != 0
     }
     #[inline(always)]
     pub fn is_promo_capture(&self) -> bool {
-        let flags = self.get_flags_raw();
+        let flags = self.get_flags_as_u8();
         (flags & PROMO_CAPTURE_FLAGS_MASK) == PROMO_CAPTURE_FLAGS_MASK
     }
-    #[inline(always)]
-    pub fn is_castle(&self) -> bool {
-        let flags = self.get_flags_raw();
-        (flags == MoveFlags::KingCastle as u8) || (flags == MoveFlags::QueenCastle as u8)
-    }
-    #[inline(always)]
-    pub fn is_ep_capture(&self) -> bool{
-        let flags = self.get_flags_raw();
-        flags == MoveFlags::EpCapture as u8
-    }
+    
 
 }
 
