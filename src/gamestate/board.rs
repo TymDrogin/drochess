@@ -4,6 +4,7 @@ use crate::gamestate::defs::*;
 
 pub type Bitboard = u64;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
 pub enum PieceType {
     Pawn,
     Knight,
@@ -35,58 +36,64 @@ pub enum Side {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Board {
-    pub white_pieces: [Bitboard; PIECE_TYPES_NUM],
-    pub black_pieces: [Bitboard; PIECE_TYPES_NUM],
+    pub pieces: [Bitboard; PIECE_TYPES_NUM * 2], // 0-5 are white pieces, 6-11 are black pieces
+    pub occupancy: [Bitboard; 2], // 0 is white occupancy, 1 is black occupancy
 }
 impl Default for Board {
     fn default() -> Self {
         Self {
-            white_pieces: [0; PIECE_TYPES_NUM],
-            black_pieces: [0; PIECE_TYPES_NUM],
+            pieces: [0; PIECE_TYPES_NUM * 2], // 0-5 are white pieces, 6-11 are black pieces
+            occupancy: [0; 2],                // 0 is white occupancy, 1 is black occupancy
         }
     }
 }
 impl Board {
     pub fn get_piece_at_square(&self, square: Square) -> Option<(PieceType, Side)> {
-        let piece_mask = square.get_mask();
+        let piece_mask: u64 = square.get_mask();
 
-        for i in 0..=PIECE_TYPES_NUM - 1 {
-            if piece_mask & self.white_pieces[i] != 0 {
-                return Some((PieceType::from_u8(i as u8), Side::White));
-            }
-            if piece_mask & self.black_pieces[i] != 0 {
-                return Some((PieceType::from_u8(i as u8), Side::Black));
+        for (i, &bitboard) in self.pieces.iter().enumerate() {
+            if piece_mask & bitboard != 0 { 
+                let pt = PieceType::from_u8(i as u8 % PIECE_TYPES_NUM as u8);
+                let side = if i < PIECE_TYPES_NUM {
+                    Side::White
+                } else {
+                    Side::Black
+                };
+                return Some((pt, side));
+
             }
         }
-        return None
+        None
     }
+
     pub fn place_piece_at_square(&mut self, square: Square, pt: PieceType, side: Side) {
         let piece_mask = square.get_mask();
+        self.pieces[Self::piece_index(pt, side)] |= piece_mask;
 
-        match side {
-            Side::White => self.white_pieces[pt as usize] |= piece_mask,
-            Side::Black => self.black_pieces[pt as usize] |= piece_mask,
-        }
+        // Update occupancy for the side
+        self.occupancy[side as usize] |= piece_mask;
+        
     }
+    
     pub fn remove_piece_at_square(&mut self, square: Square, pt: PieceType, side: Side) {
         let piece_mask = !square.get_mask();
-        match side {
-            Side::White => self.white_pieces[pt as usize] &= piece_mask,
-            Side::Black => self.black_pieces[pt as usize] &= piece_mask,
-        }
+   
+        self.pieces[Self::piece_index(pt, side)] &= piece_mask;
+        
     }
     // Clears the square for any piece and side
     pub fn clear_square(&mut self, square: Square) {
-        let piece_mask = !square.get_mask();
-        // Clear the square for white pieces
-        self.white_pieces.par_iter_mut().for_each(|i| {
-            *i &= piece_mask;
-        });
+        let mask = !square.get_mask(); // inverse: 1s everywhere except the square
 
-        // Clear the square for black pieces
-        self.black_pieces.par_iter_mut().for_each(|i| {
-            *i &= piece_mask;
-        });
+        for piece in self.pieces.iter_mut() {
+            *piece &= mask; // clear the bit at that square
+        }
+        // Update occupancy after clearing the square
+        self.occupancy[0] &= mask; // clear the bit for white occupancy
+        self.occupancy[1] &= mask; // clear the bit for black occupancy
+    }
+    fn piece_index(pt: PieceType, side: Side) -> usize {
+        pt as usize + (side as usize * PIECE_TYPES_NUM)
     }
     
 }

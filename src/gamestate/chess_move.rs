@@ -1,14 +1,14 @@
-use crate::gamestate::board::Square;
+use crate::gamestate::board::*;
 
 const MOVE_TO_OFFSET: u16 = 6;
 const FLAGS_OFFSET: u16 = 12;
 
-const PROMOTION_FLAG_MASK: u16 = 0b1000;
-const CAPTURE_FLAG_MASK:   u16 = 0b0100;
-const SPECIAL1_FLAG_MASK:  u16 = 0b0010;
-const SPECIAL2_FLAG_MASK:  u16 = 0b0001;
+const PROMOTION_FLAG_MASK: u8 = 0b1000;
+const CAPTURE_FLAG_MASK:   u8 = 0b0100;
+const SPECIAL1_FLAG_MASK:  u8 = 0b0010;
+const SPECIAL2_FLAG_MASK:  u8 = 0b0001;
 
-const PROMO_CAPTURE_FLAGS_MASK: u16 = PROMOTION_FLAG_MASK | CAPTURE_FLAG_MASK;
+const PROMO_CAPTURE_FLAGS_MASK: u8 = PROMOTION_FLAG_MASK | CAPTURE_FLAG_MASK;
 
 const INDEX_MASK: u16 = 0b111111;
 const FLAGS_MASK: u16 = 0b001111;
@@ -69,7 +69,7 @@ impl Move {
     #[inline(always)]
     pub fn is_castle(&self) -> bool {
         let flags = self.get_flags_raw();
-        (flags == KingCastle as u8) || (flags == QueenCastle as u8)
+        (flags == MoveFlags::KingCastle as u8) || (flags == MoveFlags::QueenCastle as u8)
     }
     #[inline(always)]
     pub fn is_ep_capture(&self) -> bool{
