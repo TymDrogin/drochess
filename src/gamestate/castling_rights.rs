@@ -1,6 +1,6 @@
 use crate::gamestate::board::Side;
 
-pub const BLACK_SIDE_OFFSET: u8 = 2;
+const BLACK_SIDE_OFFSET: u8 = 2;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CastlingSide {
