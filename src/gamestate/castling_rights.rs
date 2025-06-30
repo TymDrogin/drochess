@@ -23,7 +23,7 @@ impl CastlingSide {
     }
 }
 
-// structure is as follows: 0000(garbage bits), 00(black bits), 00(white bits) -> 0000****
+// The encoding is as follows: 0000(garbage bits), 00(black bits), 00(white bits) -> 0000_****
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CastlingRights(u8);
 impl CastlingRights {
@@ -60,7 +60,7 @@ impl CastlingRights {
 
         self.0 &= mask; 
     }
-    
+
     #[inline(always)]
     pub fn disable_specific_right(&mut self, side: Side, castling_side_to_disable: CastlingSide) {
         let mask: u8 = !((castling_side_to_disable as u8) << Self::shift(side));
