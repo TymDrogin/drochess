@@ -1,6 +1,7 @@
 use crate::gamestate::board::Side;
 
-const BLACK_SIDE_OFFSET: u8 = 2;
+const CASTLING_SHIFT: u8 = 2;
+const CASTLING_SIDE_MASK: u8 = 0b0000_00_11; // 2 bits for each side, 2 bits for white and 2 bits for black
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CastlingSide {
@@ -30,49 +31,45 @@ impl CastlingRights {
     pub fn new() -> Self {
         CastlingRights(0)
     }
+
     #[inline(always)]
-    pub fn get(&self) -> u8 {
+    pub fn as_u8(&self) -> u8 {
         self.0
     }
-    #[inline(always)]
-    pub fn set_for_side(&mut self, side: Side, rights: CastlingSide) {
-        match side {
-            Side::White => self.0 |= rights as u8,
-            Side::Black => self.0 |= (rights as u8) << BLACK_SIDE_OFFSET,
-        }
-    }
-    #[inline(always)]
-    pub fn get_for_side(&self, side: Side) -> CastlingSide {
-        const WHITE_MASK: u8 = 0b0000_00_11; 
-        const BLACK_MASK: u8 = 0b0000_11_00;
 
-        match side {
-            Side::White => CastlingSide::from_u8(self.0 & WHITE_MASK),
-            Side::Black => CastlingSide::from_u8(self.0 & BLACK_MASK >> BLACK_SIDE_OFFSET),
-        }
-    }
-    // If castling occures rules should be completely disabled for the side that castled
     #[inline(always)]
-    pub fn disable_full_side(&mut self, side: Side) {
-        const WHITE_MASK: u8 = 0b0000_11_00; // Since first two bits are:   0 all white rights(castling side) will be set for 0 (None)
-        const BLACK_MASK: u8 = 0b0000_00_11; // Since third and fourth are: 0 all black rights(castling side) will be set for 0 (None)
-        match side {
-            Side::White => self.0 &= WHITE_MASK,
-            Side::Black => self.0 &= BLACK_MASK,
-        }
+    pub fn set_rights(&mut self, side: Side, rights: CastlingSide) {
+        self.0 |= (rights as u8) << Self::shift(side);
     }
-    // In case one rook is moved ability to castle is lost only on one side
+
     #[inline(always)]
-    pub fn disable_part_of_side(&mut self, side: Side, castling_side_to_disable: CastlingSide) {
-        let mask: u8;
-        match side {
-            Side::White => mask = !(castling_side_to_disable as u8),
-            Side::Black => mask = !((castling_side_to_disable as u8) << BLACK_SIDE_OFFSET),
-        }
+    pub fn get_rights(&self, side: Side) -> CastlingSide {
+        let mask = CASTLING_SIDE_MASK << Self::shift(side);
+
+        CastlingSide::from_u8(self.0 & mask >> Self::shift(side))
+    }
+
+    #[inline(always)]
+    fn shift(side: Side) -> u8 {
+        CASTLING_SHIFT * side as u8
+    }
+    
+    #[inline(always)]
+    pub fn disable_side(&mut self, side: Side) {
+        let mask = !(CASTLING_SIDE_MASK << Self::shift(side));
+
+        self.0 &= mask; 
+    }
+    
+    #[inline(always)]
+    pub fn disable_specific_right(&mut self, side: Side, castling_side_to_disable: CastlingSide) {
+        let mask: u8 = !((castling_side_to_disable as u8) << Self::shift(side));
+
         self.0 &= mask;
     }
+
     #[inline(always)]
-    pub fn disable_all(&mut self) {
-        self.0 = 0;
+    pub fn clear_all(&mut self) {
+        self.0 = 0; 
     }
 }
