@@ -1,7 +1,10 @@
+
+
+
 #[cfg(test)]
 mod tests {
     use rusty_chess_engine::gamestate::{board::*, castling_rights::*};
-
+    const BLACK_SIDE_OFFSET: u8 = 2;
     #[test]
     fn test_square_new_from_file_rank() {
         let square = Square::new_from_file_rank(3, 4).unwrap();
