@@ -14,7 +14,7 @@ const INDEX_MASK: u16 = 0b111111;
 const FLAGS_MASK: u16 = 0b001111;
 
 
-
+#[derive(Clone)]
 pub struct Move(u16);
 impl Move {
     #[inline(always)]

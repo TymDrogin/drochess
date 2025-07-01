@@ -6,8 +6,8 @@ use crate::gamestate::{
     },
     defs::*,
     Gamestate,
-    Move,
-    MoveFlags
+    chess_move::Move,
+    chess_move::MoveFlags,
 };
 use std::fmt::{self, Display};
 use std::collections::HashMap;
@@ -67,8 +67,8 @@ impl Display for Gamestate {
             writeln!(f, "{}", rank + 1)?;
         }
         if PRINT_METADATA {
-            let white_rights: CastlingSide = self.castling_rights.get_for_side(Side::White);
-            let black_rights: CastlingSide = self.castling_rights.get_for_side(Side::Black);
+            let white_rights: CastlingSide = self.castling_rights.get_rights(Side::White);
+            let black_rights: CastlingSide = self.castling_rights.get_rights(Side::Black);
         
             writeln!(f)?;
             
@@ -103,7 +103,7 @@ impl Display for Gamestate {
 
 impl Display for Move {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Type: {0}, from {1} to {2}", self.decode().0, self.decode().1.to_algebraic_notation(), self.decode().2.to_algebraic_notation())?;
+        write!(f, "Type: {0}, from {1} to {2}", self.get_flags(), self.decode().0.to_algebraic_notation(), self.decode().1.to_algebraic_notation())?;
 
         Ok(())
     }

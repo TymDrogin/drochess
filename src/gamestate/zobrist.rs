@@ -1,6 +1,7 @@
 use crate::gamestate::*;
 use crate::gamestate::defs::*;
 use crate::gamestate::board::*;
+use crate::gamestate::chess_move::*;
 
 use castling_rights::CastlingSide;
 use rand::{Rng, SeedableRng};
@@ -74,7 +75,7 @@ impl Zobrist {
             },
         }
         // Castling rights
-        zobrist_key ^= CASTLING_HASHES[game.castling_rights.get() as usize];
+        zobrist_key ^= CASTLING_HASHES[game.castling_rights.as_u8() as usize];
         // En passant
         for i in 0..BOARD_SIDE_LENGTH {
             if ((1 << i) & game.en_passant as usize) != 0 {
@@ -230,21 +231,21 @@ fn update_queenside_castling_pieces_hash(zobrist_key: &mut u64, side_to_move: Si
 }
 fn update_castling_rights_disable_full_side_hash(zobrist_key: &mut u64, side: Side, castling_rights: CastlingRights) {
     // Clear old castling
-    *zobrist_key ^= CASTLING_HASHES[castling_rights.get() as usize];
+    *zobrist_key ^= CASTLING_HASHES[castling_rights.as_u8() as usize];
     // Get new rights
     let mut new_rights = castling_rights;
-    new_rights.disable_full_side(side);
+    new_rights.disable_side (side);
     // Set new rights
-    *zobrist_key ^= CASTLING_HASHES[new_rights.get() as usize];
+    *zobrist_key ^= CASTLING_HASHES[new_rights.as_u8() as usize];
 }
 fn update_castling_rights_disable_part_of_side_for_side_to_move_hash(zobrist_key: &mut u64, side: Side, castling_rights: CastlingRights, side_to_disable: CastlingSide) {
   // Clear old castling
-  *zobrist_key ^= CASTLING_HASHES[castling_rights.get() as usize];
+  *zobrist_key ^= CASTLING_HASHES[castling_rights.as_u8() as usize];
   // Get new rights
   let mut new_rights = castling_rights;
-  new_rights.disable_part_of_side(side, side_to_disable);
+  new_rights.disable_specific_right(side, side_to_disable);
   // Hash new rights
-  *zobrist_key ^= CASTLING_HASHES[new_rights.get() as usize];
+  *zobrist_key ^= CASTLING_HASHES[new_rights.as_u8() as usize];
 }
 
 // This functiond are used to generete static arrays of random values

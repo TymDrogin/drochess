@@ -1,21 +1,15 @@
-
-
 use crate::{
-    gamestate::board::*,
+    gamestate::{board::*, defs::{BOARD_NUM_OF_SQUARES, SIDE_NUM}},
     movegen::defs::*,
 };
 
 
-// Masks used for fast computation of all the attacks for a single piece at the time.
-// Get a mask by using square index
-pub const KING_ATTAKS_MASKS:[Bitboard; 64] = generate_king_attacks_masks();
-pub const KNIGHT_ATTACKS_MASKS:[Bitboard; 64] = generate_knight_attacks_masks();
+pub const KING_ATTAKS:[Bitboard; BOARD_NUM_OF_SQUARES] = generate_king_attacks();
+pub const KNIGHT_ATTACKS:[Bitboard; BOARD_NUM_OF_SQUARES] = generate_knight_attacks();
 
-pub const WHITE_PAWN_ATTACKS_MASKS: [Bitboard; 64] = generate_pawn_attacks_masks().0;
-pub const WHITE_PAWN_PUSHES_MASKS: [Bitboard; 64] = generate_pawn_pushes_masks().0;
+pub const PAWN_PUSHES:[[Bitboard; BOARD_NUM_OF_SQUARES]; SIDE_NUM] = [generate_pawn_pushes().0, generate_pawn_pushes().1];
+pub const PAWN_ATTACKS:[[Bitboard; BOARD_NUM_OF_SQUARES]; SIDE_NUM] = [generate_pawn_attacks().0, generate_pawn_attacks().1];
 
-pub const BLACK_PAWN_ATTACKS_MASKS: [Bitboard; 64] = generate_pawn_attacks_masks().1;
-pub const BLACK_PAWN_PUSHES_MASKS: [Bitboard; 64] = generate_pawn_pushes_masks().1;
 pub const ROOK_RAYS: [Bitboard; 64] = generate_rook_rays();
 pub const BISHOP_RAYS: [Bitboard; 64] = generate_bishop_rays();
 
@@ -23,7 +17,7 @@ pub const BISHOP_RAYS: [Bitboard; 64] = generate_bishop_rays();
 //pub const ROOK_RAYS: [Bitboard; 64] = generate_rook_rays();
 //pub const BISHOP_RAYS: [Bitboard; 64] = generate_bishop_rays();
 
-const fn generate_knight_attacks_masks() -> [Bitboard; 64] {
+const fn generate_knight_attacks() -> [Bitboard; 64] {
     let mut all_attacks: [Bitboard; 64] = [0; 64];
 
     let mut i: usize = 0;
@@ -48,7 +42,7 @@ const fn generate_knight_attacks_masks() -> [Bitboard; 64] {
     }
     all_attacks
 }
-const fn generate_king_attacks_masks() -> [Bitboard; 64] {
+const fn generate_king_attacks() -> [Bitboard; 64] {
     let mut all_attacks: [Bitboard; 64] = [0; 64];
 
     let mut i: usize = 0;
@@ -73,7 +67,7 @@ const fn generate_king_attacks_masks() -> [Bitboard; 64] {
     }
     all_attacks
 }
-const fn generate_pawn_attacks_masks() -> ([Bitboard; 64], [Bitboard; 64]) {
+const fn generate_pawn_attacks() -> ([Bitboard; 64], [Bitboard; 64]) {
     let mut all_white_attacks: [Bitboard; 64] = [0; 64];
     let mut all_black_attacks: [Bitboard; 64] = [0; 64];
 
@@ -96,7 +90,7 @@ const fn generate_pawn_attacks_masks() -> ([Bitboard; 64], [Bitboard; 64]) {
     }
     (all_white_attacks, all_black_attacks)
 }
-const fn generate_pawn_pushes_masks()  -> ([Bitboard; 64], [Bitboard; 64]) {
+const fn generate_pawn_pushes()  -> ([Bitboard; 64], [Bitboard; 64]) {
     let mut all_white_pushes: [Bitboard; 64] = [0; 64];
     let mut all_black_pushes: [Bitboard; 64] = [0; 64];
 
@@ -115,7 +109,7 @@ const fn generate_pawn_pushes_masks()  -> ([Bitboard; 64], [Bitboard; 64]) {
 
         black_pushes_mask |= position_mask >> -SOUTH;
         if rank == 6 { // Fifth file applies 2 square move
-            white_pushes_mask |= position_mask >> (-SOUTH * 2);
+            black_pushes_mask |= position_mask >> (-SOUTH * 2);
         }
         
         all_white_pushes[i] = white_pushes_mask;
@@ -209,3 +203,11 @@ const fn generate_bishop_rays() -> [Bitboard; 64] {
     all_rays
 }
 
+#[inline(always)]
+const fn shift(bitboard: u64, dir: i8) -> u64 {
+    if dir > 0 {
+        bitboard << dir
+    } else {
+        bitboard >> -dir
+    }
+}

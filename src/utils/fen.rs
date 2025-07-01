@@ -86,7 +86,15 @@ impl Fen {
         let half_move_clock = Self::get_half_move_clock(separated_fen[HALF_MOVE_CLOCK])?;
         let full_move_count = Self::get_full_move_count(separated_fen[FULL_MOVE_COUNTER])?;
 
-        return Ok(Gamestate::new(board, side_to_move, castling_rights, en_passant, half_move_clock, full_move_count))
+        return Ok(Gamestate::new(
+            board,
+            side_to_move,
+            castling_rights,
+            en_passant,
+            half_move_clock,
+            full_move_count,
+            0,
+        ));
     }
 
     fn get_board(s: &str) -> Result<Board, FenError> {
@@ -168,10 +176,10 @@ impl Fen {
         let mut cr = CastlingRights::new();
         for ch in s.chars() {
             match ch {
-                WHITE_KINGSIDE  => cr.set_for_side(Side::White, CastlingSide::Kingside),
-                WHITE_QUEENSIDE => cr.set_for_side(Side::White, CastlingSide::Queenside),
-                BLACK_KINGSIDE  => cr.set_for_side(Side::Black, CastlingSide::Kingside),
-                BLACK_QUEENSIDE => cr.set_for_side(Side::Black, CastlingSide::Queenside),
+                WHITE_KINGSIDE  => cr.set_rights(Side::White, CastlingSide::Kingside),
+                WHITE_QUEENSIDE => cr.set_rights(Side::White, CastlingSide::Queenside),
+                BLACK_KINGSIDE  => cr.set_rights(Side::Black, CastlingSide::Kingside),
+                BLACK_QUEENSIDE => cr.set_rights(Side::Black, CastlingSide::Queenside),
                 _ => return Err(FenError::CastlingRights),
             }
         }

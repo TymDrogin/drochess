@@ -42,8 +42,8 @@ pub struct Board {
 impl Default for Board {
     fn default() -> Self {
         Self {
-            pieces: [0; PIECE_TYPES_NUM * 2], // 0-5 are white pieces, 6-11 are black pieces
-            occupancy: [0; 2],                // 0 is white occupancy, 1 is black occupancy
+            pieces: [0; PIECE_TYPES_NUM * 2], 
+            occupancy: [0; 2],                
         }
     }
 }
@@ -65,7 +65,13 @@ impl Board {
         }
         None
     }
-
+    pub fn get_bitboard_of(&self, pt: PieceType, side: Side) -> Bitboard {
+        self.pieces[Self::piece_index(pt, side)]
+    }
+    pub fn get_squares_of(&self, pt: PieceType, side: Side) -> Vec<Square> {
+        let bitboard = self.get_bitboard_of(pt, side);
+        Square::get_squares_from_bitboard(bitboard)
+    }
     pub fn place_piece_at_square(&mut self, square: Square, pt: PieceType, side: Side) {
         let piece_mask = square.get_mask();
         self.pieces[Self::piece_index(pt, side)] |= piece_mask;
@@ -92,7 +98,7 @@ impl Board {
         self.occupancy[0] &= mask; // clear the bit for white occupancy
         self.occupancy[1] &= mask; // clear the bit for black occupancy
     }
-    fn piece_index(pt: PieceType, side: Side) -> usize {
+    pub fn piece_index(pt: PieceType, side: Side) -> usize {
         pt as usize + (side as usize * PIECE_TYPES_NUM)
     }
     
@@ -188,16 +194,13 @@ impl Square {
 
     
     #[inline(always)]
-    pub fn get_squares_from_bitboard(bitboard: Bitboard) -> Vec<Square> {
-        (0..64)
-            .into_par_iter()
-            .filter_map(|i| {
-                if (bitboard & (1u64 << i)) != 0 {
-                    Some(Square::new(i as u8))
-                } else {
-                    None
-                }
-            })
-            .collect()
+    pub fn get_squares_from_bitboard(mut bitboard: Bitboard) -> Vec<Square> {
+        let mut squares = Vec::new();
+        while bitboard != 0 {
+            let idx = bitboard.trailing_zeros() as u8;
+            squares.push(Square::new(idx));
+            bitboard &= bitboard - 1;
+        }
+        squares
     }
 }

@@ -30,15 +30,11 @@ fn print_bitboard(bitboard: u64) {
 
 fn main() {
     let mut game: Gamestate = Fen(DEFAULT_FEN.to_string()).process().unwrap();
-    let moves = MoveGen::new(&mut game).gererate();
+    let moves = MoveGen::new(&mut game).generate_moves();
     print!("The move counter for knights is {}", moves.len());
     println!();
     for mov in &moves {
         print!("{}", mov);
-        println!();
-    }
-    for i in 0..64 {
-        print_bitboard(BISHOP_RAYS[i]);
         println!();
     }
     print!("Game hash: {}", game.zobrist_key);
