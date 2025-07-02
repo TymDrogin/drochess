@@ -9,16 +9,18 @@ use board::Side;
 use board::Square;
 use masks::BISHOP_RAYS;
 use masks::ROOK_RAYS;
-use movegen::*; // Assuming movegen is in your current crate or correctly referenced
 use movegen::defs::*;
+use movegen::*; // Assuming movegen is in your current crate or correctly referenced
 
-use utils::fen::*;
-use utils::display::*;
 use gamestate::*;
+use utils::display::*;
+use utils::fen::*;
 
 fn print_bitboard(bitboard: u64) {
-    for rank in (0..8).rev() { // Ranks from 7 to 0 (a8 to h8)
-        for file in 0..8 { // Files from 0 to 7 (a to h)
+    for rank in (0..8).rev() {
+        // Ranks from 7 to 0 (a8 to h8)
+        for file in 0..8 {
+            // Files from 0 to 7 (a to h)
             let square_index = Square::new_from_file_rank(file, rank).unwrap().get_index();
             let mask = 1u64 << square_index;
             let is_set = (bitboard & mask) != 0;
@@ -39,7 +41,4 @@ fn main() {
     }
     print!("Game hash: {}", game.zobrist_key);
     print!("{}", MoveDisplayWrapper(moves));
-
-
 }
-

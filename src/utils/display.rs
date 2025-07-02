@@ -1,16 +1,13 @@
 use crate::gamestate::{
     board::*,
-    castling_rights::{
-        CastlingRights,
-        CastlingSide,
-    },
-    defs::*,
-    Gamestate,
+    castling_rights::{CastlingRights, CastlingSide},
     chess_move::Move,
     chess_move::MoveFlags,
+    defs::*,
+    Gamestate,
 };
-use std::fmt::{self, Display};
 use std::collections::HashMap;
+use std::fmt::{self, Display};
 
 const PRINT_METADATA: bool = true;
 
@@ -40,8 +37,12 @@ impl Display for Gamestate {
                 // Depending on the current player to move it will "turn" the board
                 // using reversed indexing
                 match self.side_to_move {
-                    Side::White => {square = Square::new_from_file_rank(7 - file as u8, 7 - rank as u8).unwrap()},
-                    Side::Black => {square = Square::new_from_file_rank(file as u8, rank as u8).unwrap()},
+                    Side::White => {
+                        square = Square::new_from_file_rank(7 - file as u8, 7 - rank as u8).unwrap()
+                    }
+                    Side::Black => {
+                        square = Square::new_from_file_rank(file as u8, rank as u8).unwrap()
+                    }
                 }
 
                 let piece_char = match self.board.get_piece_at_square(square) {
@@ -69,9 +70,9 @@ impl Display for Gamestate {
         if PRINT_METADATA {
             let white_rights: CastlingSide = self.castling_rights.get_rights(Side::White);
             let black_rights: CastlingSide = self.castling_rights.get_rights(Side::Black);
-        
+
             writeln!(f)?;
-            
+
             // Print White castling rights
             write!(f, "White castling rights: ")?;
             match white_rights {
@@ -79,7 +80,6 @@ impl Display for Gamestate {
                 CastlingSide::Kingside => writeln!(f, "Kingside")?,
                 CastlingSide::Queenside => writeln!(f, "Queenside")?,
                 CastlingSide::Both => writeln!(f, "Kingside and Queenside")?,
-            
             }
 
             // Print Black castling rights
@@ -103,7 +103,13 @@ impl Display for Gamestate {
 
 impl Display for Move {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Type: {0}, from {1} to {2}", self.get_flags(), self.decode().0.to_algebraic_notation(), self.decode().1.to_algebraic_notation())?;
+        write!(
+            f,
+            "Type: {0}, from {1} to {2}",
+            self.get_flags(),
+            self.decode().0.to_algebraic_notation(),
+            self.decode().1.to_algebraic_notation()
+        )?;
 
         Ok(())
     }
@@ -125,7 +131,12 @@ impl Display for MoveDisplayWrapper {
         for (from, moves) in &grouped_moves {
             writeln!(f, "From: {}", from)?;
             for m in moves {
-                writeln!(f, "-To: {}, type: {}", m.get_to_square().to_algebraic_notation(), m.get_flags())?;
+                writeln!(
+                    f,
+                    "-To: {}, type: {}",
+                    m.get_to_square().to_algebraic_notation(),
+                    m.get_flags()
+                )?;
             }
         }
 

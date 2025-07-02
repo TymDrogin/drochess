@@ -1,30 +1,28 @@
 pub mod board;
 pub mod castling_rights;
-pub mod zobrist;
-pub mod defs;
 pub mod chess_move;
+pub mod defs;
+pub mod zobrist;
 
 use rayon::iter::FlatMap;
 
 use crate::gamestate::defs::PIECE_TYPES_NUM;
 
 use self::{
-    board::{Board, Side, Square, PieceType, Bitboard},
+    board::{Bitboard, Board, PieceType, Side, Square},
     castling_rights::CastlingRights,
     zobrist::*,
 };
 
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct Gamestate {
-    pub board: Board, 
+    pub board: Board,
     pub side_to_move: Side,
     pub castling_rights: CastlingRights,
     pub en_passant: u8,
     pub half_move_clock: u8,
     pub full_move_count: u8,
     pub zobrist_key: u64,
-
 }
 impl Gamestate {
     pub fn new(
@@ -44,9 +42,6 @@ impl Gamestate {
             half_move_clock,
             full_move_count,
             zobrist_key,
-
         }
     }
-
 }
-

@@ -1,6 +1,3 @@
-
-
-
 #[cfg(test)]
 mod tests {
     use rusty_chess_engine::gamestate::{board::*, castling_rights::*};
@@ -17,7 +14,7 @@ mod tests {
 
     #[test]
     fn test_square_new_invalid() {
-        let square =  Square::new_from_file_rank(8, 8);
+        let square = Square::new_from_file_rank(8, 8);
         assert_eq!(square, None);
     }
 
@@ -111,10 +108,7 @@ mod tests {
 
         // Remove the black queen on the board at (3, 4)
         board.remove_piece_at_square(square_queen, PieceType::Queen, Side::Black);
-        assert_eq!(
-            board.black_pieces[PieceType::Queen as usize],
-            0 as Bitboard
-        );
+        assert_eq!(board.black_pieces[PieceType::Queen as usize], 0 as Bitboard);
     }
 
     #[test]
@@ -139,17 +133,11 @@ mod tests {
 
         // Clear the white knight
         board.clear_square(square_knight);
-        assert_eq!(
-            board.white_pieces[PieceType::Knight as usize],
-            0
-        );
+        assert_eq!(board.white_pieces[PieceType::Knight as usize], 0);
 
         // Clear the black queen
         board.clear_square(square_queen);
-        assert_eq!(
-            board.black_pieces[PieceType::Queen as usize],
-            0
-        );
+        assert_eq!(board.black_pieces[PieceType::Queen as usize], 0);
     }
 
     #[test]

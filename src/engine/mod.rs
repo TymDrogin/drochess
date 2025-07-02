@@ -4,7 +4,7 @@ pub enum SearchType {
 }
 pub enum CommunicationProtocol {
     Uci,
-    XBoard
+    XBoard,
 }
 
 pub struct Engine {
@@ -17,7 +17,7 @@ impl Default for Engine {
         Self {
             search: SearchType::Minimax,
             com_protocol: CommunicationProtocol::Uci,
-            depth: 6
+            depth: 6,
         }
     }
 }

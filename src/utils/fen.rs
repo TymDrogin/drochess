@@ -1,8 +1,8 @@
 use crate::gamestate::{
     board::*,
     castling_rights::{CastlingRights, CastlingSide},
-    Gamestate,
     defs::*,
+    Gamestate,
 };
 use core::str;
 use thiserror::Error;
@@ -100,61 +100,100 @@ impl Fen {
     fn get_board(s: &str) -> Result<Board, FenError> {
         let fen_ranks: Vec<&str> = s.split(SPLITTER).collect();
         if fen_ranks.len() != 8 {
-            return Err(FenError::PieceLayout(format!("The number of board ranks is not equal to 8, ranks number = `{}`", fen_ranks.len())));
+            return Err(FenError::PieceLayout(format!(
+                "The number of board ranks is not equal to 8, ranks number = `{}`",
+                fen_ranks.len()
+            )));
         }
-    
+
         let mut board = Board::default();
         for (rank_index, rank) in fen_ranks.iter().enumerate() {
             if rank_index >= BOARD_SIDE_LENGTH as usize {
-                return Err(FenError::PieceLayout(format!("Rank index value is more than 8, rank index = `{}`", rank_index)));
+                return Err(FenError::PieceLayout(format!(
+                    "Rank index value is more than 8, rank index = `{}`",
+                    rank_index
+                )));
             }
-    
+
             let mut file_index: u8 = 0;
             for piece in rank.chars() {
                 if piece.is_digit(10) {
                     let empty_squares = piece.to_digit(10).unwrap() as u8;
                     if !(1..=8).contains(&empty_squares) {
-                        return Err(FenError::PieceLayout(format!("Invalid number of empty squares: {}, at rank {}, file index {}", empty_squares, rank_index + 1, file_index + 1)));
+                        return Err(FenError::PieceLayout(format!(
+                            "Invalid number of empty squares: {}, at rank {}, file index {}",
+                            empty_squares,
+                            rank_index + 1,
+                            file_index + 1
+                        )));
                     }
-    
+
                     file_index += empty_squares;
                     continue;
                 }
                 if file_index >= BOARD_SIDE_LENGTH as u8 {
-                    return Err(FenError::PieceLayout(format!("File index value is more than 8, file index = `{}`", file_index)));
+                    return Err(FenError::PieceLayout(format!(
+                        "File index value is more than 8, file index = `{}`",
+                        file_index
+                    )));
                 }
-    
-                let square = match Square::new_from_file_rank(7 - file_index, 7 - rank_index as u8) {
+
+                let square = match Square::new_from_file_rank(7 - file_index, 7 - rank_index as u8)
+                {
                     Some(s) => s,
-                    None => return Err(FenError::PieceLayout("Invalid file or rank had been passed".to_string())),
+                    None => {
+                        return Err(FenError::PieceLayout(
+                            "Invalid file or rank had been passed".to_string(),
+                        ))
+                    }
                 };
-    
+
                 match piece {
-                    WHITE_KING =>   board.place_piece_at_square(square, PieceType::King, Side::White),
-                    WHITE_QUEEN =>  board.place_piece_at_square(square, PieceType::Queen, Side::White),
-                    WHITE_ROOK =>   board.place_piece_at_square(square, PieceType::Rook, Side::White),
-                    WHITE_BISHOP => board.place_piece_at_square(square, PieceType::Bishop, Side::White),
-                    WHITE_KNIGHT => board.place_piece_at_square(square, PieceType::Knight, Side::White),
-                    WHITE_PAWN =>   board.place_piece_at_square(square, PieceType::Pawn, Side::White),
-    
-                    BLACK_KING =>   board.place_piece_at_square(square, PieceType::King, Side::Black),
-                    BLACK_QUEEN =>  board.place_piece_at_square(square, PieceType::Queen, Side::Black),
-                    BLACK_ROOK =>   board.place_piece_at_square(square, PieceType::Rook, Side::Black),
-                    BLACK_BISHOP => board.place_piece_at_square(square, PieceType::Bishop, Side::Black),
-                    BLACK_KNIGHT => board.place_piece_at_square(square, PieceType::Knight, Side::Black),
-                    BLACK_PAWN =>   board.place_piece_at_square(square, PieceType::Pawn, Side::Black),
-    
-                    _ => return Err(FenError::PieceLayout(format!("Invalid symbol '{}' encountered", piece))),
+                    WHITE_KING => board.place_piece_at_square(square, PieceType::King, Side::White),
+                    WHITE_QUEEN => {
+                        board.place_piece_at_square(square, PieceType::Queen, Side::White)
+                    }
+                    WHITE_ROOK => board.place_piece_at_square(square, PieceType::Rook, Side::White),
+                    WHITE_BISHOP => {
+                        board.place_piece_at_square(square, PieceType::Bishop, Side::White)
+                    }
+                    WHITE_KNIGHT => {
+                        board.place_piece_at_square(square, PieceType::Knight, Side::White)
+                    }
+                    WHITE_PAWN => board.place_piece_at_square(square, PieceType::Pawn, Side::White),
+
+                    BLACK_KING => board.place_piece_at_square(square, PieceType::King, Side::Black),
+                    BLACK_QUEEN => {
+                        board.place_piece_at_square(square, PieceType::Queen, Side::Black)
+                    }
+                    BLACK_ROOK => board.place_piece_at_square(square, PieceType::Rook, Side::Black),
+                    BLACK_BISHOP => {
+                        board.place_piece_at_square(square, PieceType::Bishop, Side::Black)
+                    }
+                    BLACK_KNIGHT => {
+                        board.place_piece_at_square(square, PieceType::Knight, Side::Black)
+                    }
+                    BLACK_PAWN => board.place_piece_at_square(square, PieceType::Pawn, Side::Black),
+
+                    _ => {
+                        return Err(FenError::PieceLayout(format!(
+                            "Invalid symbol '{}' encountered",
+                            piece
+                        )))
+                    }
                 }
                 // Increment index
                 file_index += 1;
             }
-    
+
             if file_index != BOARD_SIDE_LENGTH as u8 {
-                return Err(FenError::PieceLayout(format!("By the end of the rank, file does not have exactly 8 squares, but {}", file_index)));
+                return Err(FenError::PieceLayout(format!(
+                    "By the end of the rank, file does not have exactly 8 squares, but {}",
+                    file_index
+                )));
             }
         }
-    
+
         Ok(board)
     }
     fn get_side_to_move(s: &str) -> Result<Side, FenError> {
@@ -176,9 +215,9 @@ impl Fen {
         let mut cr = CastlingRights::new();
         for ch in s.chars() {
             match ch {
-                WHITE_KINGSIDE  => cr.set_rights(Side::White, CastlingSide::Kingside),
+                WHITE_KINGSIDE => cr.set_rights(Side::White, CastlingSide::Kingside),
                 WHITE_QUEENSIDE => cr.set_rights(Side::White, CastlingSide::Queenside),
-                BLACK_KINGSIDE  => cr.set_rights(Side::Black, CastlingSide::Kingside),
+                BLACK_KINGSIDE => cr.set_rights(Side::Black, CastlingSide::Kingside),
                 BLACK_QUEENSIDE => cr.set_rights(Side::Black, CastlingSide::Queenside),
                 _ => return Err(FenError::CastlingRights),
             }

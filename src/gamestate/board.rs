@@ -1,6 +1,5 @@
-use rayon::prelude::*;
 use crate::gamestate::defs::*;
-
+use rayon::prelude::*;
 
 pub type Bitboard = u64;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -37,13 +36,13 @@ pub enum Side {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Board {
     pub pieces: [Bitboard; PIECE_TYPES_NUM * 2], // 0-5 are white pieces, 6-11 are black pieces
-    pub occupancy: [Bitboard; 2], // 0 is white occupancy, 1 is black occupancy
+    pub occupancy: [Bitboard; 2],                // 0 is white occupancy, 1 is black occupancy
 }
 impl Default for Board {
     fn default() -> Self {
         Self {
-            pieces: [0; PIECE_TYPES_NUM * 2], 
-            occupancy: [0; 2],                
+            pieces: [0; PIECE_TYPES_NUM * 2],
+            occupancy: [0; 2],
         }
     }
 }
@@ -52,7 +51,7 @@ impl Board {
         let piece_mask: u64 = square.get_mask();
 
         for (i, &bitboard) in self.pieces.iter().enumerate() {
-            if piece_mask & bitboard != 0 { 
+            if piece_mask & bitboard != 0 {
                 let pt = PieceType::from_u8(i as u8 % PIECE_TYPES_NUM as u8);
                 let side = if i < PIECE_TYPES_NUM {
                     Side::White
@@ -60,7 +59,6 @@ impl Board {
                     Side::Black
                 };
                 return Some((pt, side));
-
             }
         }
         None
@@ -78,14 +76,12 @@ impl Board {
 
         // Update occupancy for the side
         self.occupancy[side as usize] |= piece_mask;
-        
     }
-    
+
     pub fn remove_piece_at_square(&mut self, square: Square, pt: PieceType, side: Side) {
         let piece_mask = !square.get_mask();
-   
+
         self.pieces[Self::piece_index(pt, side)] &= piece_mask;
-        
     }
     // Clears the square for any piece and side
     pub fn clear_square(&mut self, square: Square) {
@@ -101,13 +97,15 @@ impl Board {
     pub fn piece_index(pt: PieceType, side: Side) -> usize {
         pt as usize + (side as usize * PIECE_TYPES_NUM)
     }
-    
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Square(u8);
 impl Square {
     pub const fn new(index: u8) -> Self {
-        assert!(index <= 63, "Attempted to create square with index more than max of 63");
+        assert!(
+            index <= 63,
+            "Attempted to create square with index more than max of 63"
+        );
         Self(index)
     }
     #[inline(always)]
@@ -157,7 +155,7 @@ impl Square {
         let file: u8 = self.0 & 7;
 
         (file, rank)
-    } 
+    }
     pub fn to_algebraic_notation(&self) -> String {
         let (file, rank) = self.get_file_rank();
 
@@ -192,7 +190,6 @@ impl Square {
         ((1 as u64) << (self.0 as u64)) as Bitboard
     }
 
-    
     #[inline(always)]
     pub fn get_squares_from_bitboard(mut bitboard: Bitboard) -> Vec<Square> {
         let mut squares = Vec::new();

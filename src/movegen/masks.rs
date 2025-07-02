@@ -1,18 +1,21 @@
 use crate::{
-    gamestate::{board::*, defs::{BOARD_NUM_OF_SQUARES, SIDE_NUM}},
+    gamestate::{
+        board::*,
+        defs::{BOARD_NUM_OF_SQUARES, SIDE_NUM},
+    },
     movegen::defs::*,
 };
 
+pub const KING_ATTAKS: [Bitboard; BOARD_NUM_OF_SQUARES] = generate_king_attacks();
+pub const KNIGHT_ATTACKS: [Bitboard; BOARD_NUM_OF_SQUARES] = generate_knight_attacks();
 
-pub const KING_ATTAKS:[Bitboard; BOARD_NUM_OF_SQUARES] = generate_king_attacks();
-pub const KNIGHT_ATTACKS:[Bitboard; BOARD_NUM_OF_SQUARES] = generate_knight_attacks();
-
-pub const PAWN_PUSHES:[[Bitboard; BOARD_NUM_OF_SQUARES]; SIDE_NUM] = [generate_pawn_pushes().0, generate_pawn_pushes().1];
-pub const PAWN_ATTACKS:[[Bitboard; BOARD_NUM_OF_SQUARES]; SIDE_NUM] = [generate_pawn_attacks().0, generate_pawn_attacks().1];
+pub const PAWN_PUSHES: [[Bitboard; BOARD_NUM_OF_SQUARES]; SIDE_NUM] =
+    [generate_pawn_pushes().0, generate_pawn_pushes().1];
+pub const PAWN_ATTACKS: [[Bitboard; BOARD_NUM_OF_SQUARES]; SIDE_NUM] =
+    [generate_pawn_attacks().0, generate_pawn_attacks().1];
 
 pub const ROOK_RAYS: [Bitboard; 64] = generate_rook_rays();
 pub const BISHOP_RAYS: [Bitboard; 64] = generate_bishop_rays();
-
 
 //pub const ROOK_RAYS: [Bitboard; 64] = generate_rook_rays();
 //pub const BISHOP_RAYS: [Bitboard; 64] = generate_bishop_rays();
@@ -51,16 +54,15 @@ const fn generate_king_attacks() -> [Bitboard; 64] {
 
         let position_mask = Square::new(i as u8).get_mask();
 
-        attacks_mask |=  position_mask << NORTH;
+        attacks_mask |= position_mask << NORTH;
         attacks_mask |= (position_mask << NORTHEAST) & NOT_A_FILE;
         attacks_mask |= (position_mask << EAST) & NOT_A_FILE;
         attacks_mask |= (position_mask >> -SOUTHEAST) & NOT_A_FILE;
 
-        attacks_mask |=  position_mask >> -SOUTH;
+        attacks_mask |= position_mask >> -SOUTH;
         attacks_mask |= (position_mask >> -SOUTHWEST) & NOT_H_FILE;
         attacks_mask |= (position_mask >> -WEST) & NOT_H_FILE;
         attacks_mask |= (position_mask << NORTHWEST) & NOT_H_FILE;
-        
 
         all_attacks[i] = attacks_mask;
         i = i + 1;
@@ -83,14 +85,14 @@ const fn generate_pawn_attacks() -> ([Bitboard; 64], [Bitboard; 64]) {
 
         black_attacks_mask |= (position_mask >> -SOUTHEAST) & NOT_A_FILE;
         black_attacks_mask |= (position_mask >> -SOUTHWEST) & NOT_H_FILE;
-        
+
         all_white_attacks[i] = white_attacks_mask;
         all_black_attacks[i] = black_attacks_mask;
         i = i + 1;
     }
     (all_white_attacks, all_black_attacks)
 }
-const fn generate_pawn_pushes()  -> ([Bitboard; 64], [Bitboard; 64]) {
+const fn generate_pawn_pushes() -> ([Bitboard; 64], [Bitboard; 64]) {
     let mut all_white_pushes: [Bitboard; 64] = [0; 64];
     let mut all_black_pushes: [Bitboard; 64] = [0; 64];
 
@@ -103,15 +105,17 @@ const fn generate_pawn_pushes()  -> ([Bitboard; 64], [Bitboard; 64]) {
         let rank = Square::new(i as u8).get_file_rank().1;
 
         white_pushes_mask |= position_mask << NORTH;
-        if rank == 1 { // Second file applies 2 square move
+        if rank == 1 {
+            // Second file applies 2 square move
             white_pushes_mask |= position_mask << (NORTH * 2);
         }
 
         black_pushes_mask |= position_mask >> -SOUTH;
-        if rank == 6 { // Fifth file applies 2 square move
+        if rank == 6 {
+            // Fifth file applies 2 square move
             black_pushes_mask |= position_mask >> (-SOUTH * 2);
         }
-        
+
         all_white_pushes[i] = white_pushes_mask;
         all_black_pushes[i] = black_pushes_mask;
         i = i + 1;

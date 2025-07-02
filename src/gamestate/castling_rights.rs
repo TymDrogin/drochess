@@ -18,7 +18,7 @@ impl CastlingSide {
             1 => CastlingSide::Kingside,
             2 => CastlingSide::Queenside,
             3 => CastlingSide::Both,
-            _ => unreachable!("Invalid castling side from u8 call")
+            _ => unreachable!("Invalid castling side from u8 call"),
         }
     }
 }
@@ -53,12 +53,12 @@ impl CastlingRights {
     fn shift(side: Side) -> u8 {
         CASTLING_SHIFT * side as u8
     }
-    
+
     #[inline(always)]
     pub fn disable_side(&mut self, side: Side) {
         let mask = !(CASTLING_SIDE_MASK << Self::shift(side));
 
-        self.0 &= mask; 
+        self.0 &= mask;
     }
 
     #[inline(always)]
@@ -70,6 +70,6 @@ impl CastlingRights {
 
     #[inline(always)]
     pub fn clear_all(&mut self) {
-        self.0 = 0; 
+        self.0 = 0;
     }
 }
