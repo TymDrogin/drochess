@@ -6,7 +6,7 @@ use crate::{
     movegen::defs::*,
 };
 
-pub const KING_ATTAKS: [Bitboard; BOARD_NUM_OF_SQUARES] = generate_king_attacks();
+pub const KING_ATTACKS: [Bitboard; BOARD_NUM_OF_SQUARES] = generate_king_attacks();
 pub const KNIGHT_ATTACKS: [Bitboard; BOARD_NUM_OF_SQUARES] = generate_knight_attacks();
 
 pub const PAWN_PUSHES: [[Bitboard; BOARD_NUM_OF_SQUARES]; SIDE_NUM] =
