@@ -1,4 +1,4 @@
-use crate::gamestate::defs::*;
+use crate::gamestate::{castling_rights::CastlingSide, defs::*};
 use rayon::prelude::*;
 
 
