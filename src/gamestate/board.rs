@@ -1,6 +1,12 @@
 use crate::gamestate::defs::*;
 use rayon::prelude::*;
 
+
+
+// Safe mode of removing something:  pieces =& !mask_of_a_thing to remove
+// Unsafe mode of removing something: pieces ^= mask_of_a_thing to remove
+// First one works, second one is faster, but can lead to bugs if you use it incorrectly, for example if the piece is not ther already
+
 pub type Bitboard = u64;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -47,53 +53,67 @@ impl Default for Board {
     }
 }
 impl Board {
-    pub fn get_piece_at_square(&self, square: Square) -> Option<(PieceType, Side)> {
-        let piece_mask: u64 = square.get_mask();
-
-        for (i, &bitboard) in self.pieces.iter().enumerate() {
-            if piece_mask & bitboard != 0 {
-                let pt = PieceType::from_u8(i as u8 % PIECE_TYPES_NUM as u8);
-                let side = if i < PIECE_TYPES_NUM {
-                    Side::White
-                } else {
-                    Side::Black
-                };
-                return Some((pt, side));
-            }
-        }
-        None
-    }
+    #[inline(always)]
     pub fn get_bitboard_of(&self, pt: PieceType, side: Side) -> Bitboard {
         self.pieces[Self::piece_index(pt, side)]
     }
+    #[inline(always)]
     pub fn get_squares_of(&self, pt: PieceType, side: Side) -> Vec<Square> {
         let bitboard = self.get_bitboard_of(pt, side);
         Square::get_squares_from_bitboard(bitboard)
     }
+    pub fn get_piece_at_square(&self, square: Square) -> Option<(PieceType, Side)> {
+        let piece_mask = square.get_mask();
+
+        self.pieces.iter().enumerate()
+            .find(|&(_, &bitboard)| bitboard & piece_mask != 0)
+            .map(|(i, _)| {
+                let pt = PieceType::from_u8((i % PIECE_TYPES_NUM) as u8);
+                let side = if i < PIECE_TYPES_NUM { Side::White } else { Side::Black };
+                (pt, side)
+            })
+    }
+    #[inline(always)]
     pub fn place_piece_at_square(&mut self, square: Square, pt: PieceType, side: Side) {
         let piece_mask = square.get_mask();
         self.pieces[Self::piece_index(pt, side)] |= piece_mask;
 
-        // Update occupancy for the side
         self.occupancy[side as usize] |= piece_mask;
     }
-
+    #[inline(always)]
     pub fn remove_piece_at_square(&mut self, square: Square, pt: PieceType, side: Side) {
-        let piece_mask = !square.get_mask();
+        let piece_mask = square.get_mask();
 
-        self.pieces[Self::piece_index(pt, side)] &= piece_mask;
-    }
-    // Clears the square for any piece and side
-    pub fn clear_square(&mut self, square: Square) {
-        let mask = !square.get_mask(); // inverse: 1s everywhere except the square
+        self.pieces[Self::piece_index(pt, side)] ^= piece_mask;
 
-        for piece in self.pieces.iter_mut() {
-            *piece &= mask; // clear the bit at that square
-        }
-        // Update occupancy after clearing the square
-        self.occupancy[0] &= mask; // clear the bit for white occupancy
-        self.occupancy[1] &= mask; // clear the bit for black occupancy
+        self.occupancy[side as usize] ^= piece_mask;
     }
+    // Cannot be used before calling the capture_piece function
+    pub fn move_piece(
+        &mut self,
+        from_square: Square,
+        to_square: Square,
+        pt: PieceType,
+        side: Side,
+    ) {
+        let from_mask = from_square.get_mask();
+        let to_mask = to_square.get_mask();
+
+        // Remove piece from the old square
+        self.pieces[Self::piece_index(pt, side)] ^= from_mask;
+        self.occupancy[side as usize] ^= from_mask;
+
+        // Place piece on the new square
+        self.pieces[Self::piece_index(pt, side)] |= to_mask;
+        self.occupancy[side as usize] |= to_mask;
+    }
+    
+    #[inline(always)]
+    pub fn is_square_occupied(&self, square: Square) -> bool {
+        let piece_mask = square.get_mask();
+        ((self.occupancy[0] | self.occupancy[1]) & piece_mask) != 0
+    }
+    #[inline(always)]
     pub fn piece_index(pt: PieceType, side: Side) -> usize {
         pt as usize + (side as usize * PIECE_TYPES_NUM)
     }

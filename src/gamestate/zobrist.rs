@@ -54,21 +54,19 @@ impl Zobrist {
         // 0..5 = White pieces, 6..11 = Black pieces
         for i in 0..6 {
             // Hash white pieces            
-            if game.board.pieces[i] != 0 {
-                for sq in game.board.get_squares_of(PieceType::from_u8(i as u8), Side::White) {
-                    let piece_hash = PIECE_HASHES[sq.get_index()][i];
-                    hash ^= piece_hash;
-                };
-            }
+            for sq in game.board.get_squares_of(PieceType::from_u8(i as u8), Side::White) {
+                let piece_hash = PIECE_HASHES[sq.get_index()][i];
+                hash ^= piece_hash;
+            };
+            
             // Hash black pieces
             let black_index = i + PIECE_TYPES_NUM; // 6..11
-            if game.board.pieces[black_index] != 0 {
-                for sq in game.board.get_squares_of(PieceType::from_u8(i as u8), Side::Black) {
-                    let piece_hash = PIECE_HASHES[sq.get_index()][black_index];
-                    hash ^= piece_hash;
-                };
-            }
+            for sq in game.board.get_squares_of(PieceType::from_u8(i as u8), Side::Black) {
+                let piece_hash = PIECE_HASHES[sq.get_index()][black_index];
+                hash ^= piece_hash;
+            };
         }
+        
         // xor castling rights
         hash ^= CASTLING_HASHES[game.castling_rights.as_u8() as usize];
 
@@ -77,15 +75,17 @@ impl Zobrist {
             let ep_file = game.en_passant.trailing_zeros() as usize;
             hash ^= EN_PASSANT_HASHES[ep_file];
         }
+        
         // xor side to move
         hash ^= SIDE_HASHES[game.side_to_move as usize];
 
-
         hash
     }
+
     /// This function is used to update the hash of the game state after a move is made.
     /// It takes the current game state and the move that was made, and updates the hash accordingly.
     /// Used in transposition tables to quickly check if a position has been seen before.
+    /// 
     pub fn incremental_hash(game: &mut Gamestate, c_move: &Move) {
 
     }

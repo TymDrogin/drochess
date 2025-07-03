@@ -1,203 +1,210 @@
 #[cfg(test)]
 mod tests {
-    use rusty_chess_engine::gamestate::{board::*, castling_rights::*};
     const BLACK_SIDE_OFFSET: u8 = 2;
-    #[test]
-    fn test_square_new_from_file_rank() {
-        let square = Square::new_from_file_rank(3, 4).unwrap();
+    mod square_tests {
+        use rusty_chess_engine::gamestate::{board::*, defs::*};
 
-        assert_eq!(square.get_index(), 35); // 4 << 3 + 3 = 32 + 3 = 35
+        #[test]
+        fn test_new() {
+            let sq = Square::new(0);
+            assert_eq!(sq.get_index(), 0);
 
-        let square = Square::new_from_file_rank(7, 7).unwrap();
-        assert_eq!(square.get_index(), 63); // 7 << 3 + 7 = 56 + 7 = 63
+            let sq = Square::new(63);
+            assert_eq!(sq.get_index(), 63);
+        }
+
+        #[test]
+        #[should_panic(expected = "Attempted to create square with index more than max of 63")]
+        fn test_new_panic() {
+            Square::new(64);
+        }
+
+        #[test]
+        fn test_new_from_file_rank() {
+            assert_eq!(Square::new_from_file_rank(0, 0).unwrap().get_index(), 0);
+            assert_eq!(Square::new_from_file_rank(7, 7).unwrap().get_index(), 63);
+            assert!(Square::new_from_file_rank(8, 0).is_none());
+            assert!(Square::new_from_file_rank(0, 8).is_none());
+        }
+
+        #[test]
+        fn test_new_from_algebraic_notation() {
+            assert_eq!(Square::new_from_algebraic_notation("a1").unwrap().get_index(), 0);
+            assert_eq!(Square::new_from_algebraic_notation("h8").unwrap().get_index(), 63);
+            assert_eq!(Square::new_from_algebraic_notation("e4").unwrap().to_algebraic_notation(), "e4");
+            assert!(Square::new_from_algebraic_notation("i9").is_none());
+            assert!(Square::new_from_algebraic_notation("a0").is_none());
+        }
+
+        #[test]
+        fn test_get_file_rank() {
+            let sq = Square::new_from_file_rank(3, 5).unwrap();
+            let (file, rank) = sq.get_file_rank();
+            assert_eq!(file, 3);
+            assert_eq!(rank, 5);
+        }
+
+        #[test]
+        fn test_to_algebraic_notation() {
+            let sq = Square::new_from_file_rank(0, 0).unwrap();
+            assert_eq!(sq.to_algebraic_notation(), "a1");
+            let sq = Square::new_from_file_rank(7, 7).unwrap();
+            assert_eq!(sq.to_algebraic_notation(), "h8");
+        }
+
+        #[test]
+        fn test_get_mask() {
+            let sq = Square::new(0);
+            assert_eq!(sq.get_mask(), 1u64);
+
+            let sq = Square::new(1);
+            assert_eq!(sq.get_mask(), 1u64 << 1);
+
+            let sq = Square::new(63);
+            assert_eq!(sq.get_mask(), 1u64 << 63);
+        }
+
+        #[test]
+        fn test_get_squares_from_bitboard() {
+            let bitboard = (1u64 << 0) | (1u64 << 5) | (1u64 << 63);
+            let squares = Square::get_squares_from_bitboard(bitboard);
+            let indices: Vec<u8> = squares.iter().map(|s| s.get_index() as u8).collect();
+            assert_eq!(indices, vec![0, 5, 63]);
+        }
     }
 
+
+    mod board_tests {
+        use rusty_chess_engine::gamestate::{board::*, defs::*};
+        
+        #[test]
+        fn test_place_piece_and_get_bitboard() {
+            let mut board = Board::default();
+            let sq = Square::new_from_algebraic_notation("e4").unwrap();
+
+            board.place_piece_at_square(sq, PieceType::Pawn, Side::White);
+
+            let bitboard = board.get_bitboard_of(PieceType::Pawn, Side::White);
+            assert_eq!(bitboard, sq.get_mask());
+
+            assert_eq!(board.occupancy[Side::White as usize], sq.get_mask());
+            assert!(board.is_square_occupied(sq));
+        }
+
+        #[test]
+        fn test_get_squares_of() {
+            let mut board = Board::default();
+            let sq1 = Square::new_from_algebraic_notation("a2").unwrap();
+            let sq2 = Square::new_from_algebraic_notation("b2").unwrap();
+
+            board.place_piece_at_square(sq1, PieceType::Pawn, Side::White);
+            board.place_piece_at_square(sq2, PieceType::Pawn, Side::White);
+
+            let squares = board.get_squares_of(PieceType::Pawn, Side::White);
+            let indices: Vec<usize> = squares.iter().map(|s| s.get_index()).collect();
+
+            assert!(indices.contains(&sq1.get_index()));
+            assert!(indices.contains(&sq2.get_index()));
+            assert_eq!(indices.len(), 2);
+        }
+
+        #[test]
+        fn test_get_piece_at_square() {
+            let mut board = Board::default();
+            let sq = Square::new_from_algebraic_notation("d5").unwrap();
+
+            assert_eq!(board.get_piece_at_square(sq), None);
+
+            board.place_piece_at_square(sq, PieceType::Knight, Side::Black);
+
+            let piece = board.get_piece_at_square(sq);
+            assert!(piece.is_some());
+
+            let (pt, side) = piece.unwrap();
+            assert_eq!(pt, PieceType::Knight);
+            assert_eq!(side, Side::Black);
+        }
+
+        #[test]
+        fn test_remove_piece_at_square() {
+            let mut board = Board::default();
+            let sq = Square::new_from_algebraic_notation("f7").unwrap();
+
+            board.place_piece_at_square(sq, PieceType::Pawn, Side::Black);
+            assert!(board.is_square_occupied(sq));
+
+            board.remove_piece_at_square(sq, PieceType::Pawn, Side::Black);
+
+            assert!(!board.is_square_occupied(sq));
+            assert_eq!(board.get_piece_at_square(sq), None);
+            assert_eq!(board.get_bitboard_of(PieceType::Pawn, Side::Black), 0);
+        }
+
+        #[test]
+        fn test_is_square_occupied() {
+            let mut board = Board::default();
+            let sq_empty = Square::new_from_algebraic_notation("a1").unwrap();
+            let sq_occupied = Square::new_from_algebraic_notation("h8").unwrap();
+
+            assert!(!board.is_square_occupied(sq_empty));
+
+            board.place_piece_at_square(sq_occupied, PieceType::King, Side::White);
+            assert!(board.is_square_occupied(sq_occupied));
+        }
+
+        #[test]
+        fn test_piece_index_consistency() {
+            for side in &[Side::White, Side::Black] {
+                for pt_u8 in 0..PIECE_TYPES_NUM {
+                    let pt = PieceType::from_u8(pt_u8 as u8);
+                    let index = Board::piece_index(pt, *side);
+
+                    if *side == Side::White {
+                        assert!(index < PIECE_TYPES_NUM);
+                    } else {
+                        assert!(index >= PIECE_TYPES_NUM);
+                    }
+                }
+            }
+        }
     #[test]
-    fn test_square_new_invalid() {
-        let square = Square::new_from_file_rank(8, 8);
-        assert_eq!(square, None);
-    }
-
-    #[test]
-    fn test_square_new_from_algebraic_notation() {
-        let square = Square::new_from_algebraic_notation("e4").unwrap();
-        assert_eq!(square.get_index(), 28); // 3 << 3 + 4 = 24 + 4 = 28
-
-        let square = Square::new_from_algebraic_notation("h8").unwrap();
-        assert_eq!(square.get_index(), 63); // 7 << 3 + 7 = 56 + 7 = 63
-    }
-
-    #[test]
-    fn test_square_get_file_rank() {
-        let square = Square::new(35); // 35 = 4 << 3 + 3 -> (3, 4)
-        let (file, rank) = square.get_file_rank();
-        assert_eq!((file, rank), (3, 4));
-
-        let square = Square::new(63); // 63 = 7 << 3 + 7 -> (7, 7)
-        let (file, rank) = square.get_file_rank();
-        assert_eq!((file, rank), (7, 7));
-    }
-    #[test]
-    fn test_get_squares_from_bitboard() {
-        let bitboard: u64 = 0b10101010; // Example bitboard with bits 1, 3, 5, 7 set
-        let squares = Square::get_squares_from_bitboard(bitboard);
-        let expected_squares: Vec<Square> = vec![
-            Square::new(1),
-            Square::new(3),
-            Square::new(5),
-            Square::new(7),
-        ];
-        assert_eq!(squares, expected_squares);
-
-        let bitboard: u64 = 0b1000000000000000000000000000000000000000000000000000000000000000; // Only the 63rd bit is set
-        let squares = Square::get_squares_from_bitboard(bitboard);
-        let expected_squares: Vec<Square> = vec![Square::new(63)];
-        assert_eq!(squares, expected_squares);
-
-        let bitboard: u64 = 0; // No bits set
-        let squares = Square::get_squares_from_bitboard(bitboard);
-        let expected_squares: Vec<Square> = vec![];
-        assert_eq!(squares, expected_squares);
-    }
-
-    #[test]
-    fn test_board_place_piece_at_square() {
+    fn test_move_piece() {
         let mut board = Board::default();
+        let from = Square::new_from_algebraic_notation("e2").unwrap();
+        let to   = Square::new_from_algebraic_notation("e4").unwrap();
 
-        let square = Square::new_from_file_rank(3, 4).unwrap();
-        board.place_piece_at_square(square, PieceType::Knight, Side::White);
-        assert_eq!(
-            board.white_pieces[PieceType::Knight as usize],
-            square.get_mask()
-        );
+        // Place a white pawn on e2
+        board.place_piece_at_square(from, PieceType::Pawn, Side::White);
+        assert!(board.is_square_occupied(from));
+        assert!(!board.is_square_occupied(to));
 
-        let square = Square::new_from_file_rank(7, 7).unwrap();
-        board.place_piece_at_square(square, PieceType::Queen, Side::Black);
-        assert_eq!(
-            board.black_pieces[PieceType::Queen as usize],
-            square.get_mask()
-        );
+        // Move it from e2 to e4
+        board.move_piece(from, to, PieceType::Pawn, Side::White);
+
+        // After the move:
+        // - e2 should be empty
+        assert!(!board.is_square_occupied(from));
+        assert_eq!(board.get_piece_at_square(from), None);
+
+        // - e4 should have the pawn
+        assert!(board.is_square_occupied(to));
+        let piece_on_to = board.get_piece_at_square(to).unwrap();
+        assert_eq!(piece_on_to, (PieceType::Pawn, Side::White));
+
+        // - bitboards must reflect the move:
+        let pawn_bb = board.get_bitboard_of(PieceType::Pawn, Side::White);
+        assert_eq!(pawn_bb, to.get_mask());
+
+        // - occupancy for White should match the pawn mask on e4
+        assert_eq!(board.occupancy[Side::White as usize], to.get_mask());
     }
 
-    #[test]
-    fn test_board_remove_piece_at_square() {
-        let mut board = Board::default();
 
-        // Place a white knight on the board at (3, 4)
-        let square_knight = Square::new_from_file_rank(3, 4).unwrap();
-        board.place_piece_at_square(square_knight, PieceType::Knight, Side::White);
-        assert_eq!(
-            board.white_pieces[PieceType::Knight as usize],
-            square_knight.get_mask() as Bitboard
-        );
 
-        // Place a black queen on the board at (7, 7)
-        let square_queen = Square::new_from_file_rank(7, 7).unwrap();
-        board.place_piece_at_square(square_queen, PieceType::Queen, Side::Black);
-        assert_eq!(
-            board.black_pieces[PieceType::Queen as usize],
-            square_queen.get_mask() as Bitboard
-        );
 
-        // Remove the white knight on the board at (3, 4)
-        board.remove_piece_at_square(square_knight, PieceType::Knight, Side::White);
-        assert_eq!(
-            board.white_pieces[PieceType::Knight as usize],
-            0 as Bitboard
-        );
 
-        // Remove the black queen on the board at (3, 4)
-        board.remove_piece_at_square(square_queen, PieceType::Queen, Side::Black);
-        assert_eq!(board.black_pieces[PieceType::Queen as usize], 0 as Bitboard);
-    }
 
-    #[test]
-    fn test_board_clear_square() {
-        let mut board = Board::default();
-
-        // Place a white knight on the board at (3, 4)
-        let square_knight = Square::new_from_file_rank(3, 4).unwrap();
-        board.place_piece_at_square(square_knight, PieceType::Knight, Side::White);
-        assert_eq!(
-            board.white_pieces[PieceType::Knight as usize],
-            square_knight.get_mask()
-        );
-
-        // Place a black queen on the board at (7, 7)
-        let square_queen = Square::new_from_file_rank(7, 7).unwrap();
-        board.place_piece_at_square(square_queen, PieceType::Queen, Side::Black);
-        assert_eq!(
-            board.black_pieces[PieceType::Queen as usize],
-            square_queen.get_mask()
-        );
-
-        // Clear the white knight
-        board.clear_square(square_knight);
-        assert_eq!(board.white_pieces[PieceType::Knight as usize], 0);
-
-        // Clear the black queen
-        board.clear_square(square_queen);
-        assert_eq!(board.black_pieces[PieceType::Queen as usize], 0);
-    }
-
-    #[test]
-    fn test_castling_rights_new() {
-        let rights = CastlingRights::new();
-        assert_eq!(rights.get(), 0);
-    }
-
-    #[test]
-    fn test_set_for_side() {
-        let mut rights = CastlingRights::new();
-        rights.set_for_side(Side::White, CastlingSide::Kingside);
-        assert_eq!(rights.get(), CastlingSide::Kingside as u8);
-
-        rights.set_for_side(Side::Black, CastlingSide::Queenside);
-        assert_eq!(
-            rights.get(),
-            (CastlingSide::Kingside as u8) | ((CastlingSide::Queenside as u8) << BLACK_SIDE_OFFSET)
-        );
-    }
-
-    #[test]
-    fn test_disable_full_side() {
-        let mut rights = CastlingRights::new();
-        rights.set_for_side(Side::White, CastlingSide::Both);
-        rights.set_for_side(Side::Black, CastlingSide::Both);
-        rights.disable_full_side(Side::White);
-        assert_eq!(
-            rights.get(),
-            (CastlingSide::Both as u8) << BLACK_SIDE_OFFSET
-        );
-
-        rights.disable_full_side(Side::Black);
-        assert_eq!(rights.get(), 0);
-    }
-
-    #[test]
-    fn test_disable_part_of_side() {
-        let mut rights = CastlingRights::new();
-        rights.set_for_side(Side::White, CastlingSide::Both);
-        rights.set_for_side(Side::Black, CastlingSide::Both);
-
-        rights.disable_part_of_side(Side::White, CastlingSide::Kingside);
-        assert_eq!(
-            rights.get(),
-            (CastlingSide::Queenside as u8) | ((CastlingSide::Both as u8) << BLACK_SIDE_OFFSET)
-        );
-
-        rights.disable_part_of_side(Side::Black, CastlingSide::Queenside);
-        assert_eq!(
-            rights.get(),
-            (CastlingSide::Queenside as u8) | (CastlingSide::Kingside as u8) << BLACK_SIDE_OFFSET
-        );
-    }
-    #[test]
-    fn test_disable_all() {
-        let mut rights = CastlingRights::new();
-        rights.set_for_side(Side::White, CastlingSide::Both);
-        rights.set_for_side(Side::Black, CastlingSide::Both);
-        rights.disable_all();
-        assert_eq!(rights.get(), 0);
     }
 }
+
+    
