@@ -86,7 +86,7 @@ impl Zobrist {
     /// This function is used to update the hash of the game state after a move is made.
     /// It takes the current game state and the move that was made, and updates the hash accordingly.
     /// Used in transposition tables to quickly check if a position has been seen before.
-    pub fn incremental_hash(game: &mut Gamestate, chess_move: &ChessMove) {
+    pub fn incremental_hash(game: &mut Gamestate, c_move: &Move) {
 
     }
 

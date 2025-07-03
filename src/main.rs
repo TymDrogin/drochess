@@ -39,6 +39,7 @@ fn main() {
         print!("{}", mov);
         println!();
     }
-    print!("Game hash: {}", game.zobrist_key);
+
+    println!("{:?}", game);
     print!("{}", MoveDisplayWrapper(moves));
 }

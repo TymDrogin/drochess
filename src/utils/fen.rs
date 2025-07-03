@@ -3,6 +3,7 @@ use crate::gamestate::{
     castling_rights::{CastlingRights, CastlingSide},
     defs::*,
     Gamestate,
+    zobrist::*
 };
 use core::str;
 use thiserror::Error;
@@ -86,7 +87,7 @@ impl Fen {
         let half_move_clock = Self::get_half_move_clock(separated_fen[HALF_MOVE_CLOCK])?;
         let full_move_count = Self::get_full_move_count(separated_fen[FULL_MOVE_COUNTER])?;
 
-        return Ok(Gamestate::new(
+        let mut game = Gamestate::new(
             board,
             side_to_move,
             castling_rights,
@@ -94,7 +95,9 @@ impl Fen {
             half_move_clock,
             full_move_count,
             0,
-        ));
+        );
+        game.zobrist_key = Zobrist::hash(&game);
+        Ok(game)
     }
 
     fn get_board(s: &str) -> Result<Board, FenError> {
