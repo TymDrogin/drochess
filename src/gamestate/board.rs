@@ -1,4 +1,4 @@
-use crate::gamestate::{castling_rights::CastlingSide, defs::*};
+use crate::gamestate::{castling_rights::CastlingSide, constants::*};
 use rayon::prelude::*;
 
 
@@ -74,14 +74,14 @@ impl Board {
             })
     }
     #[inline(always)]
-    pub fn place_piece_at_square(&mut self, square: Square, pt: PieceType, side: Side) {
+    pub fn add_piece(&mut self, square: Square, pt: PieceType, side: Side) {
         let piece_mask = square.get_mask();
         self.pieces[Self::piece_index(pt, side)] |= piece_mask;
 
         self.occupancy[side as usize] |= piece_mask;
     }
-    #[inline(always)]
-    pub fn remove_piece_at_square(&mut self, square: Square, pt: PieceType, side: Side) {
+    #[inline]
+    fn remove_piece(&mut self, square: Square, pt: PieceType, side: Side) {
         let piece_mask = square.get_mask();
 
         self.pieces[Self::piece_index(pt, side)] ^= piece_mask;
@@ -134,7 +134,6 @@ impl Square {
             return None;
         }
 
-        // << 3 is equal to 2^3 or 8, but faster to compute (like its even matter aha)
         let rank_file_as_index: u8 = (rank << 3) + file;
         Some(Square(rank_file_as_index))
     }

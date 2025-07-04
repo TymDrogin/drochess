@@ -1,14 +1,14 @@
-pub mod defs;
+mod constants;
 pub mod masks;
 
 use crate::gamestate::{
     board::*,
     castling_rights::*,
     chess_move::{Move, MoveFlags},
-    defs::*,
+    constants::*,
     Gamestate,
 };
-use defs::*;
+use constants::*;
 use masks::*;
 
 pub struct MoveGen<'a> {

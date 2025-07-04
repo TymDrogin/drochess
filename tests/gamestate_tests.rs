@@ -2,7 +2,7 @@
 mod tests {
     const BLACK_SIDE_OFFSET: u8 = 2;
     mod square_tests {
-        use rusty_chess_engine::gamestate::{board::*, defs::*};
+        use rusty_chess_engine::gamestate::{board::*, constants::*};
 
         #[test]
         fn test_new() {
@@ -75,14 +75,14 @@ mod tests {
 
 
     mod board_tests {
-        use rusty_chess_engine::gamestate::{board::*, defs::*};
+        use rusty_chess_engine::gamestate::{board::*, constants::*};
         
         #[test]
         fn test_place_piece_and_get_bitboard() {
             let mut board = Board::default();
             let sq = Square::new_from_algebraic_notation("e4").unwrap();
 
-            board.place_piece_at_square(sq, PieceType::Pawn, Side::White);
+            board.add_piece(sq, PieceType::Pawn, Side::White);
 
             let bitboard = board.get_bitboard_of(PieceType::Pawn, Side::White);
             assert_eq!(bitboard, sq.get_mask());
@@ -97,8 +97,8 @@ mod tests {
             let sq1 = Square::new_from_algebraic_notation("a2").unwrap();
             let sq2 = Square::new_from_algebraic_notation("b2").unwrap();
 
-            board.place_piece_at_square(sq1, PieceType::Pawn, Side::White);
-            board.place_piece_at_square(sq2, PieceType::Pawn, Side::White);
+            board.add_piece(sq1, PieceType::Pawn, Side::White);
+            board.add_piece(sq2, PieceType::Pawn, Side::White);
 
             let squares = board.get_squares_of(PieceType::Pawn, Side::White);
             let indices: Vec<usize> = squares.iter().map(|s| s.get_index()).collect();
@@ -115,7 +115,7 @@ mod tests {
 
             assert_eq!(board.get_piece_at_square(sq), None);
 
-            board.place_piece_at_square(sq, PieceType::Knight, Side::Black);
+            board.add_piece(sq, PieceType::Knight, Side::Black);
 
             let piece = board.get_piece_at_square(sq);
             assert!(piece.is_some());
@@ -126,21 +126,6 @@ mod tests {
         }
 
         #[test]
-        fn test_remove_piece_at_square() {
-            let mut board = Board::default();
-            let sq = Square::new_from_algebraic_notation("f7").unwrap();
-
-            board.place_piece_at_square(sq, PieceType::Pawn, Side::Black);
-            assert!(board.is_square_occupied(sq));
-
-            board.remove_piece_at_square(sq, PieceType::Pawn, Side::Black);
-
-            assert!(!board.is_square_occupied(sq));
-            assert_eq!(board.get_piece_at_square(sq), None);
-            assert_eq!(board.get_bitboard_of(PieceType::Pawn, Side::Black), 0);
-        }
-
-        #[test]
         fn test_is_square_occupied() {
             let mut board = Board::default();
             let sq_empty = Square::new_from_algebraic_notation("a1").unwrap();
@@ -148,7 +133,7 @@ mod tests {
 
             assert!(!board.is_square_occupied(sq_empty));
 
-            board.place_piece_at_square(sq_occupied, PieceType::King, Side::White);
+            board.add_piece(sq_occupied, PieceType::King, Side::White);
             assert!(board.is_square_occupied(sq_occupied));
         }
 
@@ -174,7 +159,7 @@ mod tests {
         let to   = Square::new_from_algebraic_notation("e4").unwrap();
 
         // Place a white pawn on e2
-        board.place_piece_at_square(from, PieceType::Pawn, Side::White);
+        board.add_piece(from, PieceType::Pawn, Side::White);
         assert!(board.is_square_occupied(from));
         assert!(!board.is_square_occupied(to));
 

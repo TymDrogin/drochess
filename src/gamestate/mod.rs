@@ -1,12 +1,12 @@
 pub mod board;
 pub mod castling_rights;
 pub mod chess_move;
-pub mod defs;
+pub mod constants;
 pub mod zobrist;
 
 use rayon::iter::FlatMap;
 
-use crate::gamestate::defs::PIECE_TYPES_NUM;
+use crate::gamestate::constants::PIECE_TYPES_NUM;
 use serde::*;
 
 use self::{

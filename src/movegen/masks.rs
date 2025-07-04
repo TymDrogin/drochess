@@ -1,9 +1,9 @@
 use crate::{
     gamestate::{
         board::*,
-        defs::{BOARD_NUM_OF_SQUARES, SIDE_NUM},
+        constants::{BOARD_NUM_OF_SQUARES, SIDE_NUM},
     },
-    movegen::defs::*,
+    movegen::constants::*,
 };
 
 pub const KING_ATTACKS: [Bitboard; BOARD_NUM_OF_SQUARES] = generate_king_attacks();
@@ -16,10 +16,6 @@ pub const PAWN_ATTACKS: [[Bitboard; BOARD_NUM_OF_SQUARES]; SIDE_NUM] =
 
 pub const ROOK_RAYS: [Bitboard; 64] = generate_rook_rays();
 pub const BISHOP_RAYS: [Bitboard; 64] = generate_bishop_rays();
-
-//pub const ROOK_RAYS: [Bitboard; 64] = generate_rook_rays();
-//pub const BISHOP_RAYS: [Bitboard; 64] = generate_bishop_rays();
-
 const fn generate_knight_attacks() -> [Bitboard; 64] {
     let mut all_attacks: [Bitboard; 64] = [0; 64];
 

@@ -3,7 +3,7 @@ use crate::gamestate::{
     castling_rights::{CastlingRights, CastlingSide},
     chess_move::Move,
     chess_move::MoveFlags,
-    defs::*,
+    constants::*,
     Gamestate,
 };
 use std::collections::HashMap;

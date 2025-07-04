@@ -1,6 +1,6 @@
 use crate::gamestate::board::*;
 use crate::gamestate::chess_move::*;
-use crate::gamestate::defs::*;
+use crate::gamestate::constants::*;
 use crate::gamestate::*;
 
 use castling_rights::CastlingSide;
@@ -11,38 +11,11 @@ use rayon::prelude::*;
 
 const SEED: u64 = 1231231;
 lazy_static! {
-    // The map looks like this - side of the piece - square on which piece is located - type of the piece, resulting in 768 random values for each possible combination
     static ref PIECE_HASHES: [[u64; PIECE_TYPES_NUM * 2]; BOARD_NUM_OF_SQUARES] = generate_pieces_hashes(SEED);
     static ref SIDE_HASHES: [u64; SIDE_NUM] = generate_side_hashes(SEED);
     static ref CASTLING_HASHES: [u64; CASTLING_CONFIGURATIONS_NUM] = generate_castling_hashes(SEED);
     static ref EN_PASSANT_HASHES: [u64; BOARD_SIDE_LENGTH] = generate_enpassant_hashes(SEED);
 }
-
-const WHITE_SIDE: usize = 0;
-const BLACK_SIDE: usize = 1;
-// Castling initial positions
-const WHITE_KING_STARTING_INDEX: u8 = 4;
-const BLACK_KING_STARTING_INDEX: u8 = 60;
-// -- kingside
-const WHITE_ROOK_KINGSIDE_STATING_INDEX: u8 = 7;
-const BLACK_ROOK_KINGSIDE_STATING_INDEX: u8 = 63;
-// --queenside
-const WHITE_ROOK_QUEENSIDE_STARTING_INDEX: u8 = 0;
-const BLACK_ROOK_QUEENSIDE_STARTING_INDEX: u8 = 56;
-
-// Castling end positions
-// -- kings kingside
-const WHITE_KING_KINGSIDE_END_INDEX: u8 = 6;
-const BLACK_KING_KINGSIDE_END_INDEX: u8 = 62;
-// -- kings queenside
-const WHITE_KING_QUEENSIDE_END_INDEX: u8 = 2;
-const BLACK_KING_QUEENSIDE_END_INDEX: u8 = 58;
-// -- rooks kingside
-const WHITE_ROOK_KINGSIDE_END_INDEX: u8 = 5;
-const BLACK_ROOK_KINGSIDE_END_INDEX: u8 = 61;
-// -- rooks queenside
-const WHITE_ROOK_QUEENSIDE_END_INDEX: u8 = 3;
-const BLACK_ROOK_QUEENSIDE_END_INDEX: u8 = 59;
 
 pub struct Zobrist;
 impl Zobrist {
@@ -53,18 +26,24 @@ impl Zobrist {
 
         // 0..5 = White pieces, 6..11 = Black pieces
         for i in 0..6 {
-            // Hash white pieces            
-            for sq in game.board.get_squares_of(PieceType::from_u8(i as u8), Side::White) {
-                let piece_hash = PIECE_HASHES[sq.get_index()][i];
-                hash ^= piece_hash;
-            };
-            
-            // Hash black pieces
+            let piece_type = PieceType::from_u8(i as u8);
+
+            // White pieces
+            let mut bb_white = game.board.get_bitboard_of(piece_type, Side::White);
+            while bb_white != 0 {
+                let sq_index = bb_white.trailing_zeros() as usize;
+                bb_white &= bb_white - 1; 
+                hash ^= PIECE_HASHES[sq_index][i];
+            }
+
+            // Black pieces
+            let mut bb_black = game.board.get_bitboard_of(piece_type, Side::Black);
             let black_index = i + PIECE_TYPES_NUM; // 6..11
-            for sq in game.board.get_squares_of(PieceType::from_u8(i as u8), Side::Black) {
-                let piece_hash = PIECE_HASHES[sq.get_index()][black_index];
-                hash ^= piece_hash;
-            };
+            while bb_black != 0 {
+                let sq_index = bb_black.trailing_zeros() as usize;
+                bb_black &= bb_black - 1;
+                hash ^= PIECE_HASHES[sq_index][black_index];
+            }
         }
         
         // xor castling rights
@@ -82,13 +61,6 @@ impl Zobrist {
         hash
     }
 
-    /// This function is used to update the hash of the game state after a move is made.
-    /// It takes the current game state and the move that was made, and updates the hash accordingly.
-    /// Used in transposition tables to quickly check if a position has been seen before.
-    /// 
-    pub fn incremental_hash(game: &mut Gamestate, c_move: &Move) {
-
-    }
 
 }
 
