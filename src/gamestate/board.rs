@@ -16,7 +16,7 @@ pub enum PieceType {
     Bishop,
     Rook,
     Queen,
-    King,
+    King
 }
 impl PieceType {
     pub fn from_u8(i: u8) -> Self {
@@ -60,7 +60,7 @@ impl Board {
     #[inline(always)]
     pub fn get_squares_of(&self, pt: PieceType, side: Side) -> Vec<Square> {
         let bitboard = self.get_bitboard_of(pt, side);
-        Square::get_squares_from_bitboard(bitboard)
+        Square::from_bitboard(bitboard)
     }
     pub fn get_piece_at_square(&self, square: Square) -> Option<(PieceType, Side)> {
         let piece_mask = square.get_mask();
@@ -129,13 +129,15 @@ impl Square {
         Self(index)
     }
     #[inline(always)]
-    pub const fn new_from_file_rank(file: u8, rank: u8) -> Option<Square> {
+    pub const fn new_from_file_rank(file: u8, rank: u8) -> Square {
         if rank > 7 || file > 7 {
-            return None;
+            panic!(
+                "Attempted to create square with file or rank more than max of 7"
+            );
         }
 
         let rank_file_as_index: u8 = (rank << 3) + file;
-        Some(Square(rank_file_as_index))
+        Square(rank_file_as_index)
     }
     pub fn new_from_algebraic_notation(coords: &str) -> Option<Square> {
         let file = match coords.chars().nth(0).unwrap() {
@@ -160,15 +162,20 @@ impl Square {
             '8' => 7,
             _ => return None,
         };
-        // It does not make sense to unwrup it to then wrap to some,
-        // Even that we know that on this stage values for file and rank are 100% legal
-        Self::new_from_file_rank(file, rank)
+        Some(Self::new_from_file_rank(file, rank))
     }
     #[inline(always)]
     pub const fn get_index(&self) -> usize {
         self.0 as usize
     }
     #[inline(always)]
+    pub const fn get_file(&self) -> u8 {
+        self.0 & 7 
+    }
+    #[inline(always)]
+    pub const fn get_rank(&self) -> u8 {
+        self.0 >> 3 
+    }
     pub const fn get_file_rank(&self) -> (u8, u8) {
         let rank: u8 = self.0 >> 3;
         let file: u8 = self.0 & 7;
@@ -210,7 +217,7 @@ impl Square {
     }
 
     #[inline(always)]
-    pub fn get_squares_from_bitboard(mut bitboard: Bitboard) -> Vec<Square> {
+    pub fn from_bitboard(mut bitboard: Bitboard) -> Vec<Square> {
         let mut squares = Vec::new();
         while bitboard != 0 {
             let idx = bitboard.trailing_zeros() as u8;
