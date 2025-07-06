@@ -141,15 +141,7 @@ impl Fen {
                     )));
                 }
 
-                let square = match Square::new_from_file_rank(7 - file_index, 7 - rank_index as u8)
-                {
-                    Some(s) => s,
-                    None => {
-                        return Err(FenError::PieceLayout(
-                            "Invalid file or rank had been passed".to_string(),
-                        ))
-                    }
-                };
+                let square = Square::new_from_file_rank(file_index, 7 - rank_index as u8);
 
                 match piece {
                     WHITE_KING => board.add_piece(square, PieceType::King, Side::White),
