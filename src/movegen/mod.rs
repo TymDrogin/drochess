@@ -145,9 +145,7 @@ impl<'a> MoveGen<'a> {
 
         if rights.can_castle_kingside(self.game.side_to_move) {
             // Check if the squares between the king and rook are empty
-                       print!("Generating kingside castling moves\n");
             let empty_mask = CASTLING_KINGSIDE_OCCUPANCY_MASK[self.game.side_to_move as usize] & combined_occupancy;
-            print!("Empty mask for kingside castling: {:064b}\n", empty_mask);
             if empty_mask == 0 {
                 let king_start = CASTLING_KING_START_INDEX[self.game.side_to_move as usize];
                 let king_end = CASTLING_KING_KINGSIDE_END_INDEX[self.game.side_to_move as usize];
@@ -160,10 +158,8 @@ impl<'a> MoveGen<'a> {
             }
         }
         if rights.can_castle_queenside(self.game.side_to_move) {
-            print!("Generating queenside castling moves\n");
             // Check if the squares between the king and rook are empty
             let empty_mask = CASTLING_QUEENSIDE_OCCUPANCY_MASK[self.game.side_to_move as usize] & combined_occupancy;
-            print!("Empty mask for queenside castling: {:064b}\n", empty_mask);
             if empty_mask == 0 {
                 let king_start = CASTLING_KING_START_INDEX[self.game.side_to_move as usize];
                 let king_end = CASTLING_KING_QUEENSIDE_END_INDEX[self.game.side_to_move as usize];
