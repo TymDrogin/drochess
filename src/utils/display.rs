@@ -6,23 +6,24 @@ use crate::gamestate::{
     constants::*,
     Gamestate,
 };
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::write};
 use std::fmt::{self, Display};
 
 const PRINT_METADATA: bool = true;
 
-pub const WHITE_PAWN: char = '♙';
-pub const WHITE_KNIGHT: char = '♘';
-pub const WHITE_BISHOP: char = '♗';
-pub const WHITE_ROOK: char = '♖';
-pub const WHITE_QUEEN: char = '♕';
-pub const WHITE_KING: char = '♔';
-pub const BLACK_PAWN: char = '♟';
-pub const BLACK_KNIGHT: char = '♞';
-pub const BLACK_BISHOP: char = '♝';
-pub const BLACK_ROOK: char = '♜';
-pub const BLACK_QUEEN: char = '♛';
-pub const BLACK_KING: char = '♚';
+pub const WHITE_PAWN: char = '♟';
+pub const WHITE_KNIGHT: char = '♞';
+pub const WHITE_BISHOP: char = '♝';
+pub const WHITE_ROOK: char = '♜';
+pub const WHITE_QUEEN: char = '♛';
+pub const WHITE_KING: char = '♚';
+
+pub const BLACK_PAWN: char = '♙';
+pub const BLACK_KNIGHT: char = '♘';
+pub const BLACK_BISHOP: char = '♗';
+pub const BLACK_ROOK: char = '♖';
+pub const BLACK_QUEEN: char = '♕';
+pub const BLACK_KING: char = '♔';
 
 pub const EMPTY: char = '.';
 
@@ -31,19 +32,14 @@ impl Display for Gamestate {
         // Print board
         writeln!(f, "a b c d e f g h")?;
         for rank in (0..BOARD_SIDE_LENGTH).rev() {
-            for file in 0..BOARD_SIDE_LENGTH {
-                let square: Square;
+            for file in 0..BOARD_SIDE_LENGTH  {
 
                 // Depending on the current player to move it will "turn" the board
                 // using reversed indexing
-                match self.side_to_move {
-                    Side::White => {
-                        square = Square::new_from_file_rank(7 - file as u8, 7 - rank as u8).unwrap()
-                    }
-                    Side::Black => {
-                        square = Square::new_from_file_rank(file as u8, rank as u8).unwrap()
-                    }
-                }
+                let square = match self.side_to_move {
+                    Side::White => Square::new_from_file_rank(file as u8, rank as u8),
+                    Side::Black => Square::new_from_file_rank(7 - file as u8, 7 - rank as u8),
+                };
 
                 let piece_char = match self.board.get_piece_at_square(square) {
                     None => EMPTY,
@@ -96,6 +92,12 @@ impl Display for Gamestate {
             writeln!(f)?;
             write!(f, "Full move counter: {0}", self.full_move_count)?;
             writeln!(f)?;
+            write!(f, "Side to move: ")?;
+            match self.side_to_move {
+                Side::White => writeln!(f, "White")?,
+                Side::Black => writeln!(f, "Black")?,
+            }
+            
         }
         Ok(())
     }
@@ -131,19 +133,14 @@ impl Display for MoveDisplayWrapper {
         for (from, moves) in &grouped_moves {
             writeln!(f, "From: {}", from)?;
             for m in moves {
-                writeln!(
-                    f,
-                    "-To: {}, type: {}",
-                    m.get_to_square().to_algebraic_notation(),
-                    m.get_flags()
-                )?;
+                // Use the existing Display implementation for Move
+                writeln!(f, "- {}", m)?;
             }
         }
 
         Ok(())
     }
 }
-
 impl fmt::Display for MoveFlags {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = match *self {

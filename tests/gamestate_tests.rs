@@ -3,6 +3,7 @@ mod tests {
     const BLACK_SIDE_OFFSET: u8 = 2;
     mod square_tests {
         use rusty_chess_engine::gamestate::{board::*, constants::*};
+        use std::panic;
 
         #[test]
         fn test_new() {
@@ -20,12 +21,22 @@ mod tests {
         }
 
         #[test]
-        fn test_new_from_file_rank() {
-            assert_eq!(Square::new_from_file_rank(0, 0).unwrap().get_index(), 0);
-            assert_eq!(Square::new_from_file_rank(7, 7).unwrap().get_index(), 63);
-            assert!(Square::new_from_file_rank(8, 0).is_none());
-            assert!(Square::new_from_file_rank(0, 8).is_none());
-        }
+    fn test_new_from_file_rank() {
+        assert_eq!(Square::new_from_file_rank(0, 0).get_index(), 0);
+        assert_eq!(Square::new_from_file_rank(7, 7).get_index(), 63);
+
+        // Catch panic from invalid file
+        let result = panic::catch_unwind(|| {
+            Square::new_from_file_rank(8, 0);
+        });
+        assert!(result.is_err());
+
+        // Catch panic from invalid rank
+        let result = panic::catch_unwind(|| {
+            Square::new_from_file_rank(0, 8);
+        });
+        assert!(result.is_err());
+}
 
         #[test]
         fn test_new_from_algebraic_notation() {
@@ -38,7 +49,7 @@ mod tests {
 
         #[test]
         fn test_get_file_rank() {
-            let sq = Square::new_from_file_rank(3, 5).unwrap();
+            let sq = Square::new_from_file_rank(3, 5);
             let (file, rank) = sq.get_file_rank();
             assert_eq!(file, 3);
             assert_eq!(rank, 5);
@@ -46,9 +57,9 @@ mod tests {
 
         #[test]
         fn test_to_algebraic_notation() {
-            let sq = Square::new_from_file_rank(0, 0).unwrap();
+            let sq = Square::new_from_file_rank(0, 0);
             assert_eq!(sq.to_algebraic_notation(), "a1");
-            let sq = Square::new_from_file_rank(7, 7).unwrap();
+            let sq = Square::new_from_file_rank(7, 7);
             assert_eq!(sq.to_algebraic_notation(), "h8");
         }
 
@@ -67,7 +78,7 @@ mod tests {
         #[test]
         fn test_get_squares_from_bitboard() {
             let bitboard = (1u64 << 0) | (1u64 << 5) | (1u64 << 63);
-            let squares = Square::get_squares_from_bitboard(bitboard);
+            let squares = Square::from_bitboard(bitboard);
             let indices: Vec<u8> = squares.iter().map(|s| s.get_index() as u8).collect();
             assert_eq!(indices, vec![0, 5, 63]);
         }

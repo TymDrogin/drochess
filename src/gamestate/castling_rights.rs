@@ -32,6 +32,19 @@ impl CastlingRights {
         CastlingRights(0)
     }
 
+    pub fn can_castle(&self, side: Side) -> bool {
+        let rights = self.get_rights(side);
+        rights != CastlingSide::None
+    }
+    pub fn can_castle_kingside(&self, side: Side) -> bool {
+        let rights = self.get_rights(side);
+        rights == CastlingSide::Kingside || rights == CastlingSide::Both
+    }
+    pub fn can_castle_queenside(&self, side: Side) -> bool {
+        let rights = self.get_rights(side);
+        rights == CastlingSide::Queenside || rights == CastlingSide::Both
+    }
+
     #[inline(always)]
     pub fn as_u8(&self) -> u8 {
         self.0

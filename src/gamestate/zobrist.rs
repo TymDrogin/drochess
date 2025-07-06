@@ -65,7 +65,6 @@ impl Zobrist {
 }
 
 
-// This functiond are used to generete static arrays of random values
 fn generate_pieces_hashes(seed: u64) -> [[u64; PIECE_TYPES_NUM * 2]; BOARD_NUM_OF_SQUARES] {
     let mut rng = StdRng::seed_from_u64(seed);
     let mut array: [[u64; 12]; 64]= [[0; PIECE_TYPES_NUM * 2]; BOARD_NUM_OF_SQUARES];
