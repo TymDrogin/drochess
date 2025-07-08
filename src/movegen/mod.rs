@@ -123,17 +123,34 @@ impl<'a> MoveGen<'a> {
     fn generate_queen_quiet_moves(&mut self) {
         todo!()
     }
+    fn generete_promotion_quiet_moves(&mut self) {
+        todo!()
+    }
+
+    fn generate_pawn_capture_moves(&mut self) {
+        todo!()
+    }
+    fn generate_knight_capture_moves(&mut self) {
+        todo!()
+    }
+    fn generate_bishop_capture_moves(&mut self) {
+        todo!()
+    }
+    fn generate_rook_capture_moves(&mut self) {
+        todo!()
+    }
+    fn generate_queen_capture_moves(&mut self) {
+        todo!()
+    }
+    fn generate_promotion_capture_moves(&mut self) {
+        todo!()
+    }
+
     
-
-
-
-
-
-
     // This function relies on the castling rights of the game state.
     // If gamestate is not properly updated, it will not check for it.
+    // It also does not check if the rook is even at the right square for castling.
     // It only checks if the squares between the king and rook are empty.
-
     fn generate_castling_moves(&mut self) {
         let rights = self.game.castling_rights;
         

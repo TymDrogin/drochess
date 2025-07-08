@@ -43,6 +43,7 @@ pub const CLEAR_7TH_OR_2ND_RANK: [u64; 2] = [RANK_7, RANK_2];
 // Inverted file bitmasks (to prevent wrapping)
 #[allow(unused)]
 pub const NOT_A_FILE: Bitboard = !A_FILE;
+#[allow(unused)]
 pub const NOT_B_FILE: Bitboard = !B_FILE;
 #[allow(unused)]
 pub const NOT_C_FILE: Bitboard = !C_FILE;
@@ -52,22 +53,35 @@ pub const NOT_D_FILE: Bitboard = !D_FILE;
 pub const NOT_E_FILE: Bitboard = !E_FILE;
 #[allow(unused)]
 pub const NOT_F_FILE: Bitboard = !F_FILE;
+#[allow(unused)]
 pub const NOT_G_FILE: Bitboard = !G_FILE;
+#[allow(unused)]
 pub const NOT_H_FILE: Bitboard = !H_FILE;
 
 // Combined file bitmasks to prevent wrapping)
+#[allow(unused)]
 pub const NOT_AB_FILE: Bitboard = NOT_A_FILE & NOT_B_FILE;
+#[allow(unused)]
 pub const NOT_GH_FILE: Bitboard = NOT_G_FILE & NOT_H_FILE;
 
 // Check out https://www.chessprogramming.org/Knight_Pattern for idea what they are for
+#[allow(unused)]
 pub const NO_NO_EA: i32 = 17; // North-North-East
+#[allow(unused)]
 pub const NO_EA_EA: i32 = 10; // North-East-East
+#[allow(unused)]
 pub const SO_EA_EA: i32 = -6; // South-East-East
+#[allow(unused)]
 pub const SO_SO_EA: i32 = -15; // South-South-East
+#[allow(unused)]
 pub const SO_SO_WE: i32 = -17; // South-South-West
+#[allow(unused)]
 pub const SO_WE_WE: i32 = -10; // South-West-West
+#[allow(unused)]
 pub const NO_WE_WE: i32 = 6; // North-West-West
+#[allow(unused)]
 pub const NO_NO_WE: i32 = 15; // North-North-West
+#[allow(unused)]
 
 // King and pawn offsets for attacks
 #[allow(unused)]
