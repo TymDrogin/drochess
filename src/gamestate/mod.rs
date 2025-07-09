@@ -7,7 +7,6 @@ pub mod zobrist;
 use rayon::iter::FlatMap;
 
 use crate::gamestate::constants::PIECE_TYPES_NUM;
-use serde::*;
 
 use self::{
     board::{Bitboard, Board, PieceType, Side, Square},
