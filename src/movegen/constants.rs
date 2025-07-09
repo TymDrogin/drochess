@@ -117,13 +117,3 @@ pub const CASTLING_ROOK_KINGSIDE_END_INDEX: [u8; 2] = [5, 61]; // White and Blac
 pub const CASTLING_KING_QUEENSIDE_END_INDEX: [u8; 2] = [2, 58]; // White and Black queenside end squares
 pub const CASTLING_ROOK_QUEENSIDE_END_INDEX: [u8; 2] = [3, 59]; // White and Black queenside end squares
 
-// Castling occupancy masks
-// These masks are used to check if the squares between the king and rook are occupied
-pub const CASTLING_KINGSIDE_OCCUPANCY_MASK: [Bitboard; 2] = [
-  (1 << 5 | 1 << 6),
-  (1 << 61 | 1 << 62)
-];
-pub const CASTLING_QUEENSIDE_OCCUPANCY_MASK: [Bitboard; 2] = [
-  (1 << 1 | 1 << 2 | 1 << 3),
-  (1 << 57 | 1 << 58 | 1 << 59)
-];

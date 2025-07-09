@@ -17,6 +17,20 @@ pub const PAWN_ATTACKS: [[Bitboard; BOARD_NUM_OF_SQUARES]; SIDE_NUM] =
     [generate_pawn_attacks().0, generate_pawn_attacks().1];
 
 
+
+// Castling occupancy masks
+// These masks are used to check if the squares between the king and rook are occupied
+pub const CASTLING_KINGSIDE_OCCUPANCY_MASK: [Bitboard; 2] = [
+  (1 << 5 | 1 << 6),
+  (1 << 61 | 1 << 62)
+];
+pub const CASTLING_QUEENSIDE_OCCUPANCY_MASK: [Bitboard; 2] = [
+  (1 << 1 | 1 << 2 | 1 << 3),
+  (1 << 57 | 1 << 58 | 1 << 59)
+];
+
+
+
 const fn generate_knight_attacks() -> [Bitboard; 64] {
     let mut all_attacks: [Bitboard; 64] = [0; 64];
     let mut i: usize = 0;
