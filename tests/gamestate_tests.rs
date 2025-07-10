@@ -2,7 +2,7 @@
 mod tests {
     const BLACK_SIDE_OFFSET: u8 = 2;
     mod square_tests {
-        use rusty_chess_engine::gamestate::{board::*, constants::*};
+        use drochess::gamestate::{board::*, constants::*};
         use std::panic;
 
         #[test]
@@ -86,7 +86,7 @@ mod tests {
 
 
     mod board_tests {
-        use rusty_chess_engine::gamestate::{board::*, constants::*};
+        use drochess::gamestate::{board::*, constants::*};
         
         #[test]
         fn test_place_piece_and_get_bitboard() {
