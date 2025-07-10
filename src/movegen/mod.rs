@@ -1,12 +1,13 @@
 pub mod constants;
 pub mod masks;
+mod sliders;
 
 use crate::gamestate::{
     board::*,
     castling_rights::*,
     chess_move::{Move, MoveFlags},
     constants::*,
-    Gamestate,
+    Gamestate,          
 };
 use constants::*;
 use masks::*;

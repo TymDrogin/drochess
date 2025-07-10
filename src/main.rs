@@ -7,6 +7,8 @@ mod engine;
 
 use board::Side;
 use board::Square;
+use drochess::movegen::masks::BISHOP_ATTACKS;
+use drochess::movegen::masks::ROOK_ATTACKS;
 use movegen::constants::*;
 use movegen::*; // Assuming movegen is in your current crate or correctly referenced
 
