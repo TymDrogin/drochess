@@ -1,32 +1,39 @@
-# Drochess chess engine
+# Drochess Chess Engine
 
-Drochess is a chess engine I am working on in my free time.
-The engine is fully implemented in rust, and aims to be simple in design and fast.
-I am trying use most of the conventional tecnics for developing an engine while 
-maintaining the clarity of the design and using as many nice developer features rust has to offer as possible.
+**Drochess** is a chess engine I'm developing in my free time.  
+The engine is fully implemented in Rust and aims to be both **simple in design** and **fast** in execution.
 
-If you are intrested in contributing, please do it.
-Every module does exaclty what you whould expect it to do, and some features that has no defined category are located in utils.
+I'm using most conventional techniques for chess engine development while maintaining **clarity** in design and leveraging **Rust’s developer-friendly features** wherever possible.
+
+If you're interested in contributing, feel free to jump in!  
+Each module does exactly what you'd expect it to do. Utility functions that don’t fit a specific category are located in the `utils` module.
+
+---
 
 ## Features
 
-- **Game States**: Full implementation of game states.
-- **FEN Processor**: Parse and process FEN strings to initialize the board state.
-- **Display**: Nicely formatted board and moves display in the console.
-- **Movegen**: Bitboard based movegen. I am using rayon whenever it is possible, but performance of it is yet to be tested.
+- **Game States** – Full implementation of game state management.
+- **FEN Processor** – Parses and processes FEN strings to initialize the board.
+- **Display** – Nicely formatted board and move display in the console.
+- **Move Generation** – Bitboard-based move generation.
 
-## Libraries 
+---
 
-- **Thiserror**: Easy errors.
-- **Rand**: Self-explanatory.
-- **once_cell**: Used to define compile time arrays of random numbers for Zobrist hashes.
+## Libraries Used
 
+- [`thiserror`](https://crates.io/crates/thiserror) – For simple and ergonomic error handling.
+- [`rand`](https://crates.io/crates/rand) – Random number generation (e.g., Zobrist hashing).
+- [`once_cell`](https://crates.io/crates/once_cell) – Used to define compile-time arrays of random numbers for Zobrist hashing.
+
+---
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Rust](https://www.rust-lang.org/tools/install) - Make sure you have Rust installed on your system.
+- [Rust](https://www.rust-lang.org/tools/install) – Install Rust with `rustup`.
+- A **CPU with BMI (Bit Manipulation Instructions)** support is currently required. (for PEXT-based sliding pieces movegen).
+- Future versions will include **magic bitboards** as a fallback for multiplatform support.
 
 ### Installation
 
@@ -45,14 +52,6 @@ Every module does exaclty what you whould expect it to do, and some features tha
 
 ### Running the Engine
 
-After building the project, you can run the chess engine using:
+To run the chess engine:
 ```sh
 cargo run
-```
-
-Unit test can be run using:
-```sh
-cargo test
-```
-
-Becnhmarks are not yet implemented, howewer they are planed.
