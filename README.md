@@ -17,10 +17,9 @@ Every module does exaclty what you whould expect it to do, and some features tha
 
 ## Libraries 
 
-- **Rayon**: Easy to use parallelization framework that is used a lot in the move generation.
 - **Thiserror**: Easy errors.
 - **Rand**: Self-explanatory.
-- **lazy_static**: A macro for defining lazily evaluated statics. Used mostly for lookup tables etc.
+- **once_cell**: Used to define compile time arrays of random numbers for Zobrist hashes.
 
 
 ## Getting Started
