@@ -1,21 +1,27 @@
+use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
+use once_cell::sync::Lazy;
+
 use crate::gamestate::board::*;
 use crate::gamestate::chess_move::*;
 use crate::gamestate::constants::*;
 use crate::gamestate::*;
-
 use castling_rights::CastlingSide;
-use lazy_static::lazy_static;
-use rand::rngs::StdRng;
-use rand::{Rng, SeedableRng};
-use rayon::prelude::*;
+
 
 const SEED: u64 = 1231231;
-lazy_static! {
-    static ref PIECE_HASHES: [[u64; PIECE_TYPES_NUM * 2]; BOARD_NUM_OF_SQUARES] = generate_pieces_hashes(SEED);
-    static ref SIDE_HASHES: [u64; SIDE_NUM] = generate_side_hashes(SEED);
-    static ref CASTLING_HASHES: [u64; CASTLING_CONFIGURATIONS_NUM] = generate_castling_hashes(SEED);
-    static ref EN_PASSANT_HASHES: [u64; BOARD_SIDE_LENGTH] = generate_enpassant_hashes(SEED);
-}
+
+static PIECE_HASHES: Lazy<[[u64; PIECE_TYPES_NUM * 2]; BOARD_NUM_OF_SQUARES]> =
+    Lazy::new(|| generate_pieces_hashes(SEED));
+
+static SIDE_HASHES: Lazy<[u64; SIDE_NUM]> =
+    Lazy::new(|| generate_side_hashes(SEED));
+
+static CASTLING_HASHES: Lazy<[u64; CASTLING_CONFIGURATIONS_NUM]> =
+    Lazy::new(|| generate_castling_hashes(SEED));
+
+static EN_PASSANT_HASHES: Lazy<[u64; BOARD_SIDE_LENGTH]> =
+    Lazy::new(|| generate_enpassant_hashes(SEED));
 
 pub struct Zobrist;
 impl Zobrist {

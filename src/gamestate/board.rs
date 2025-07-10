@@ -1,6 +1,4 @@
 use crate::gamestate::{castling_rights::CastlingSide, constants::*};
-use rayon::prelude::*;
-
 
 
 // Safe mode of removing something:  pieces =& !mask_of_a_thing to remove
