@@ -7,10 +7,10 @@ mod engine;
 
 use board::Side;
 use board::Square;
-use drochess::movegen::masks::BISHOP_ATTACKS;
-use drochess::movegen::masks::ROOK_ATTACKS;
+
 use movegen::constants::*;
 use movegen::*; // Assuming movegen is in your current crate or correctly referenced
+use movegen::sliders::calculate_rook_attacks;
 
 use gamestate::*;
 use gamestate::board::{PieceType, Bitboard};
@@ -44,4 +44,21 @@ fn main() {
     print!("King is at square {}" ,game.board.get_piece_at_square(Square::new(4)).unwrap().0 as usize);
 
     println!("{}", game);
+
+
+    let rook_sq = Square::new_from_file_rank(3, 3);
+    let occ_empty = 0;
+    let attacks = calculate_rook_attacks(rook_sq, occ_empty);
+    println!("Rook attacks from d4 on empty board:");
+    print_bitboard(attacks);
+
+    // 2) Visual test: rook on a1 blocked by pieces on a3 and c1
+    let rook_sq = Square::new_from_file_rank(0, 0);
+    let blockers = 
+        Square::new_from_file_rank(0, 2).get_mask() | // a3
+        Square::new_from_file_rank(2, 0).get_mask(); // c1;
+
+    let attacks = calculate_rook_attacks(rook_sq, blockers);
+    println!("\nRook attacks from a1 with blockers on a3 & c1:");
+    print_bitboard(attacks);
 }

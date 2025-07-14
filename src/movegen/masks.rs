@@ -239,7 +239,7 @@ const fn generate_bishop_masks() -> [Bitboard; 64] {
     masks
 }
 
-const fn shift(bitboard: Bitboard, dir: i32) -> Bitboard {
+pub const fn shift(bitboard: Bitboard, dir: i32) -> Bitboard {
     if dir >= 0 {
         bitboard << dir
     } else {

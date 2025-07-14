@@ -1,6 +1,6 @@
 pub mod constants;
 pub mod masks;
-mod sliders;
+pub mod sliders;
 
 use crate::gamestate::{
     board::*,
