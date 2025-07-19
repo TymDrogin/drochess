@@ -8,6 +8,8 @@ mod engine;
 use board::Side;
 use board::Square;
 
+use drochess::movegen::masks::BISHOP_MASKS;
+use drochess::movegen::masks::ROOK_MASKS;
 use movegen::constants::*;
 use movegen::*; // Assuming movegen is in your current crate or correctly referenced
 use movegen::sliders::calculate_rook_attacks;
@@ -61,4 +63,5 @@ fn main() {
     let attacks = calculate_rook_attacks(rook_sq, blockers);
     println!("\nRook attacks from a1 with blockers on a3 & c1:");
     print_bitboard(attacks);
+    
 }

@@ -5,6 +5,7 @@ use crate::gamestate::{
 use crate::movegen::constants::NORTH;
 use crate::movegen::masks::*;
 
+
 use core::arch::x86_64::_pext_u64;
 
 
@@ -74,7 +75,7 @@ pub fn calculate_rook_attacks(square: Square, occupancy: Bitboard) -> Bitboard {
 
     attack
 }
-fn calculate_bishop_attacks(square: Square, occupancy: Bitboard) -> Bitboard {
+pub fn calculate_bishop_attacks(square: Square, occupancy: Bitboard) -> Bitboard {
     let idx = square.get_index();
     let (file, rank) = square.get_file_rank();
 
@@ -134,3 +135,4 @@ fn calculate_bishop_attacks(square: Square, occupancy: Bitboard) -> Bitboard {
 
     attack
 }
+
