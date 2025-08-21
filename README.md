@@ -8,6 +8,8 @@ I'm using most conventional techniques for chess engine development while mainta
 If you're interested in contributing, feel free to jump in!  
 Each module does exactly what you'd expect it to do. Utility functions that don’t fit a specific category are located in the `utils` module.
 
+Current state of the engine is in the dev branch! 
+
 ---
 
 ## Features
